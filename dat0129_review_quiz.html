@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DAT0129 Review Quiz</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#1a1d24; --border:#2a2e38; --text:#e6e8ec;
+    --muted:#9aa1ac; --accent:#5b8cff; --good:#3ecf6a; --bad:#ff5c5c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg); color:var(--text); font-family:Segoe UI,Arial,sans-serif;
+    margin:0; padding:20px; display:flex; justify-content:center;
+  }
+  .wrap{max-width:720px; width:100%;}
+  h1{font-size:1.3em; margin-bottom:4px;}
+  .sub{color:var(--muted); font-size:0.9em; margin-bottom:16px;}
+  .stats{display:flex; gap:16px; margin-bottom:16px; font-size:0.9em; color:var(--muted);}
+  .stats b{color:var(--text);}
+  .card{
+    background:var(--panel); border:1px solid var(--border); border-radius:10px;
+    padding:18px; margin-bottom:14px;
+  }
+  .qtag{font-size:0.75em; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;}
+  .qtext{font-size:1.05em; margin-bottom:12px; line-height:1.4;}
+  .opt{
+    display:block; width:100%; text-align:left; background:#22262f; color:var(--text);
+    border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:8px;
+    cursor:pointer; font-size:0.95em;
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt.correct{background:rgba(62,207,106,0.15); border-color:var(--good);}
+  .opt.wrong{background:rgba(255,92,92,0.15); border-color:var(--bad);}
+  .opt:disabled{cursor:default;}
+  .explain{font-size:0.88em; color:var(--muted); margin-top:8px; display:none; line-height:1.4;}
+  .nextbtn{
+    background:var(--accent); color:#fff; border:none; border-radius:8px; padding:9px 16px;
+    cursor:pointer; font-size:0.9em; margin-top:10px; display:none;
+  }
+  .progress{height:6px; background:var(--border); border-radius:3px; margin-bottom:16px; overflow:hidden;}
+  .progress-bar{height:100%; background:var(--accent); width:0%; transition:width .2s;}
+  .done{text-align:center; padding:40px 10px;}
+  .done h2{color:var(--good);}
+  .restart{
+    background:var(--accent); color:#fff; border:none; border-radius:8px; padding:10px 20px;
+    cursor:pointer; font-size:0.95em; margin-top:12px;
+  }
+  #app{display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>DAT0129 Review Quiz</h1>
+  <div class="sub">DB Setup · DB Design · DDL · DML · DQL · Python — 30 questions</div>
+  <div class="stats">
+    <div>Score: <b id="score">0</b>/<span id="total">30</span></div>
+    <div>Streak: <b id="streak">0</b></div>
+    <div>Best streak: <b id="beststreak">0</b></div>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progbar"></div></div>
+  <div id="app"></div>
+  <div id="doneScreen" style="display:none;" class="done">
+    <h2>Quiz Complete</h2>
+    <p id="finalScore"></p>
+    <button class="restart" onclick="restart()">Restart</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+// DATABASE SETUP
+{tag:"DB Setup", q:"In pg_hba.conf, which authentication method requires a password and sends it hashed over the connection?", opts:["trust","peer","md5","ident"], a:2, e:"md5 requires a hashed password; trust needs none; peer uses OS username matching."},
+{tag:"DB Setup", q:"Which command connects to a PostgreSQL database named lib_kass0079 as user dbadmin via psql?", opts:["psql -U dbadmin -d lib_kass0079","psql --connect lib_kass0079","postgres -u dbadmin lib_kass0079","sql dbadmin lib_kass0079"], a:0, e:"-U specifies user, -d specifies database name."},
+{tag:"DB Setup", q:"The peer authentication method in pg_hba.conf matches a database login to which of the following?", opts:["The client's IP address","The client's OS system username","A stored password hash","An SSL certificate"], a:1, e:"Peer auth matches the connecting OS user to the PostgreSQL role of the same name."},
+{tag:"DB Setup", q:"Which PostgreSQL config file controls client authentication rules (host, method, database, user)?", opts:["postgresql.conf","pg_hba.conf","pg_ident.conf","recovery.conf"], a:1, e:"pg_hba.conf (host-based authentication) defines who can connect and how."},
+{tag:"DB Setup", q:"After editing pg_hba.conf, what must you do for changes to take effect?", opts:["Nothing, changes are instant","Reload or restart the PostgreSQL service","Drop and recreate the database","Reinstall PostgreSQL"], a:1, e:"A config reload (pg_ctl reload or systemctl reload postgresql) applies the changes."},
+// DATABASE DESIGN
+{tag:"DB Design", q:"In an ERD, a table that resolves a many-to-many relationship between two entities is called a:", opts:["Surrogate table","Junction table","Foreign table","Cardinality table"], a:1, e:"A junction (bridge) table holds foreign keys from both sides to resolve M:N relationships."},
+{tag:"DB Design", q:"A surrogate key differs from a natural key in that it:", opts:["Is derived from real-world data","Has business meaning","Is an artificial, system-generated identifier","Must be a composite of two columns"], a:2, e:"Surrogate keys (e.g., auto-increment IDs) carry no business meaning, unlike natural keys."},
+{tag:"DB Design", q:"In a library schema with book, book_copy, member, and loan tables, why does book_copy exist separately from book?", opts:["To store multiple physical copies of the same book title","To store member contact info","To normalize the loan table only","It is redundant and unnecessary"], a:0, e:"book_copy tracks individual physical copies, since one book title can have many copies."},
+{tag:"DB Design", q:"Which normal form eliminates transitive dependencies (non-key attributes depending on other non-key attributes)?", opts:["1NF","2NF","3NF","BCNF"], a:2, e:"3NF removes transitive dependencies; 2NF removes partial dependencies on composite keys."},
+{tag:"DB Design", q:"A foreign key constraint primarily enforces:", opts:["Uniqueness of a column","Referential integrity between tables","Data type conversion","Index creation"], a:1, e:"Foreign keys ensure a value in one table matches an existing value in the referenced table."},
+// DDL
+{tag:"DDL", q:"Which SQL command is used to create a new table?", opts:["CREATE TABLE","INSERT TABLE","NEW TABLE","MAKE TABLE"], a:0, e:"CREATE TABLE is DDL used to define a new table structure."},
+{tag:"DDL", q:"Which statement permanently removes a table and its structure from the database?", opts:["DELETE TABLE","TRUNCATE TABLE","DROP TABLE","REMOVE TABLE"], a:2, e:"DROP TABLE removes the table definition and all its data; TRUNCATE only clears rows."},
+{tag:"DDL", q:"Which clause adds a new column to an existing table?", opts:["ALTER TABLE ... ADD COLUMN","MODIFY TABLE ... NEW COLUMN","UPDATE TABLE ... ADD","CREATE COLUMN"], a:0, e:"ALTER TABLE ... ADD COLUMN is the standard DDL syntax for adding columns."},
+{tag:"DDL", q:"Which constraint ensures a column's value must reference an existing row in another table?", opts:["PRIMARY KEY","UNIQUE","FOREIGN KEY","NOT NULL"], a:2, e:"FOREIGN KEY enforces referential integrity to another table's primary/unique key."},
+{tag:"DDL", q:"TRUNCATE TABLE differs from DELETE FROM in that TRUNCATE:", opts:["Can use a WHERE clause","Is DML, not DDL","Removes all rows and typically resets identity/auto-increment counters","Only works on views"], a:2, e:"TRUNCATE is a DDL-like operation that removes all rows fast and resets sequences, without WHERE support."},
+// DML
+{tag:"DML", q:"Which statement adds a new row into a table?", opts:["INSERT INTO","ADD ROW","APPEND TABLE","CREATE ROW"], a:0, e:"INSERT INTO table (columns) VALUES (...) adds new rows."},
+{tag:"DML", q:"Which clause is required in an UPDATE statement to avoid modifying every row in the table?", opts:["ORDER BY","WHERE","GROUP BY","HAVING"], a:1, e:"Without WHERE, UPDATE applies to all rows in the table."},
+{tag:"DML", q:"Which statement removes rows from a table based on a condition, but keeps the table structure?", opts:["DROP TABLE","DELETE FROM ... WHERE","TRUNCATE TABLE","ALTER TABLE"], a:1, e:"DELETE FROM ... WHERE removes matching rows only; the table itself remains."},
+{tag:"DML", q:"What does the following do? UPDATE loan SET returned = TRUE WHERE loan_id = 5;", opts:["Deletes loan 5","Creates a new loan record","Marks loan 5 as returned","Creates the loan table"], a:2, e:"UPDATE with WHERE modifies the returned column for the single matching row."},
+{tag:"DML", q:"Which of these is classified as DML (Data Manipulation Language)?", opts:["CREATE, ALTER, DROP","INSERT, UPDATE, DELETE","SELECT, JOIN","GRANT, REVOKE"], a:1, e:"INSERT, UPDATE, DELETE manipulate data; CREATE/ALTER/DROP are DDL; GRANT/REVOKE are DCL."},
+// DQL
+{tag:"DQL", q:"Which SQL clause filters rows before any grouping occurs?", opts:["HAVING","WHERE","GROUP BY","ORDER BY"], a:1, e:"WHERE filters individual rows before GROUP BY aggregates them."},
+{tag:"DQL", q:"Which JOIN returns only rows that have matching values in both tables?", opts:["LEFT JOIN","RIGHT JOIN","INNER JOIN","FULL OUTER JOIN"], a:2, e:"INNER JOIN returns only rows where the join condition matches in both tables."},
+{tag:"DQL", q:"To list all members along with their loans, including members with zero loans, which JOIN is correct?", opts:["INNER JOIN member to loan","LEFT JOIN member to loan","RIGHT JOIN loan to book","CROSS JOIN only"], a:1, e:"LEFT JOIN keeps all rows from member even when there's no matching loan row."},
+{tag:"DQL", q:"Which clause filters groups after aggregation (e.g., COUNT(*) > 5)?", opts:["WHERE","HAVING","FILTER","ORDER BY"], a:1, e:"HAVING filters aggregated group results; WHERE cannot reference aggregate functions."},
+{tag:"DQL", q:"Which query returns the count of loans per member, sorted by highest count first?", opts:["SELECT member_id, COUNT(*) FROM loan GROUP BY member_id ORDER BY COUNT(*) DESC","SELECT member_id FROM loan ORDER BY COUNT(*)","SELECT COUNT(member_id) FROM loan","SELECT * FROM loan GROUP BY COUNT(*)"], a:0, e:"GROUP BY member_id aggregates loans per member; ORDER BY COUNT(*) DESC sorts descending."},
+// PYTHON
+{tag:"Python", q:"What data type does Python use for an ordered, mutable collection of items?", opts:["tuple","list","set","frozenset"], a:1, e:"Lists are ordered and mutable; tuples are ordered but immutable; sets are unordered."},
+{tag:"Python", q:"Which module is commonly used in Python to read and write CSV files?", opts:["json","csv","os","sys"], a:1, e:"The built-in csv module provides reader/writer objects for CSV files."},
+{tag:"Python", q:"What does the following return? len({'a':1, 'b':2, 'c':3})", opts:["1","3","6","Error"], a:1, e:"len() on a dict returns the number of key-value pairs, which is 3."},
+{tag:"Python", q:"Which function converts a JSON string into a Python dictionary?", opts:["json.dumps()","json.loads()","json.load()","json.parse()"], a:1, e:"json.loads() parses a JSON string into a Python object; json.dumps() does the reverse."},
+{tag:"Python", q:"In Python, what is the correct way to open a file for reading with automatic closing?", opts:["f = open('file.txt'); f.read()","with open('file.txt') as f: data = f.read()","file.read('file.txt')","import file.txt"], a:1, e:"The 'with' statement (context manager) auto-closes the file after the block."}
+];
+
+let order = [];
+let current = 0;
+let score = 0;
+let streak = 0;
+let best = 0;
+let answered = false;
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function init(){
+  order = shuffle([...questions.keys()]);
+  current = 0; score = 0; streak = 0; best = 0; answered = false;
+  document.getElementById('score').textContent = 0;
+  document.getElementById('streak').textContent = 0;
+  document.getElementById('beststreak').textContent = 0;
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('doneScreen').style.display = 'none';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  const idx = order[current];
+  const item = questions[idx];
+  const optOrder = shuffle(item.opts.map((o,i)=>i));
+  const correctPos = optOrder.indexOf(item.a);
+
+  document.getElementById('progbar').style.width = (current/questions.length*100)+'%';
+
+  let html = `<div class="card">
+    <div class="qtag">${item.tag} · Q${current+1}/${questions.length}</div>
+    <div class="qtext">${item.q}</div>`;
+  optOrder.forEach((origIdx, pos)=>{
+    html += `<button class="opt" onclick="selectOpt(${pos}, ${correctPos}, this)">${item.opts[origIdx]}</button>`;
+  });
+  html += `<div class="explain" id="explain">${item.e}</div>
+    <button class="nextbtn" id="nextbtn" onclick="nextQuestion()">Next →</button>
+  </div>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function selectOpt(pos, correctPos, btn){
+  if(answered) return;
+  answered = true;
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((o,i)=>{
+    o.disabled = true;
+    if(i === correctPos) o.classList.add('correct');
+  });
+  if(pos === correctPos){
+    btn.classList.add('correct');
+    score++; streak++;
+    if(streak > best) best = streak;
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+  }
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('beststreak').textContent = best;
+  document.getElementById('explain').style.display = 'block';
+  document.getElementById('nextbtn').style.display = 'inline-block';
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= questions.length){
+    document.getElementById('progbar').style.width = '100%';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('doneScreen').style.display = 'block';
+    document.getElementById('finalScore').textContent = `Final score: ${score}/${questions.length} — Best streak: ${best}`;
+  } else {
+    renderQuestion();
+  }
+}
+
+function restart(){ init(); }
+
+init();
+</script>
+</body>
+</html>
