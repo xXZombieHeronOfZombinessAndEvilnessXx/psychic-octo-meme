@@ -14,70 +14,68 @@
     background:var(--bg); color:var(--text); font-family:Segoe UI,Arial,sans-serif;
     margin:0; padding:20px; display:flex; justify-content:center;
   }
-  .wrap{max-width:720px; width:100%;}
+  .wrap{max-width:760px; width:100%;}
   h1{font-size:1.4em; margin-bottom:4px;}
   .sub{color:var(--muted); font-size:0.9em; margin-bottom:24px;}
+  .term{margin-bottom:32px;}
+  .term > h2{
+    font-size:1.15em; color:var(--text); border-bottom:1px solid var(--border);
+    padding-bottom:8px; margin-bottom:16px; text-transform:capitalize;
+  }
+  .section{margin-bottom:18px;}
+  .section h3{
+    font-size:0.8em; text-transform:uppercase; letter-spacing:0.5px;
+    color:var(--accent); margin:0 0 10px 0;
+  }
   .card{
     background:var(--panel); border:1px solid var(--border); border-radius:10px;
-    padding:16px 18px; margin-bottom:14px;
+    padding:14px 16px; margin-bottom:10px;
   }
-  .card h2{font-size:1.05em; margin:0 0 10px 0; color:var(--accent);}
+  .card h4{font-size:0.98em; margin:0 0 8px 0;}
   .links{display:flex; flex-direction:column; gap:8px;}
   .links a{
     display:block; background:#22262f; color:var(--text); text-decoration:none;
-    border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:0.92em;
+    border:1px solid var(--border); border-radius:8px; padding:9px 12px; font-size:0.9em;
     transition:border-color .15s, background .15s;
   }
   .links a:hover{border-color:var(--accent); background:#262b35;}
+  .empty{color:var(--muted); font-size:0.85em; font-style:italic;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Quizzes</h1>
-  <div class="sub">Review quizzes by course</div>
-
-  <div class="card">
-    <h2>CST8246 — Network Services Administration</h2>
-    <div class="links">
-      <a href="cst8246-quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>CST8371 — Enterprise Networking</h2>
-    <div class="links">
-      <a href="cst8371-quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>CST8342 — Windows Enterprise Administration</h2>
-    <div class="links">
-      <a href="cst8342-quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>DAT0129 — Database Management</h2>
-    <div class="links">
-      <a href="dat0129_review_quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>CST8316 — PC Troubleshooting</h2>
-    <div class="links">
-      <a href="cst8316-quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>CST8206 — IT Service Management</h2>
-    <div class="links">
-      <a href="cst8206-quiz.html">Review Quiz</a>
-    </div>
-  </div>
-
+  <div class="sub">Organized by term</div>
+  <div id="content"><div class="empty">Loading...</div></div>
 </div>
+
+<script>
+fetch('quizzes.json')
+  .then(r => r.json())
+  .then(data => {
+    let html = '';
+    for (const [term, sections] of Object.entries(data)) {
+      html += `<div class="term"><h2>${term.replace(/-/g, ' ')}</h2>`;
+      for (const [section, quizzes] of Object.entries(sections)) {
+        html += `<div class="section"><h3>${section}</h3>`;
+        if (quizzes.length === 0) {
+          html += `<div class="empty">No quizzes added yet.</div>`;
+        } else {
+          quizzes.forEach(q => {
+            html += `<div class="card"><h4>${q.course}</h4><div class="links">
+              <a href="${term}/${section}/${q.file}">Review Quiz</a></div></div>`;
+          });
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+    }
+    document.getElementById('content').innerHTML = html || '<div class="empty">No quizzes found.</div>';
+  })
+  .catch(err => {
+    document.getElementById('content').innerHTML = '<div class="empty">Could not load quizzes.json</div>';
+    console.error(err);
+  });
+</script>
 </body>
 </html>
