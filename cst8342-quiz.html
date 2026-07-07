@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows Server & Active Directory Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: #1e2d45;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow-orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0; }
+  .glow-orb-1 { width: 400px; height: 400px; background: rgba(0,212,255,0.08); top: -100px; right: -100px; }
+  .glow-orb-2 { width: 300px; height: 300px; background: rgba(124,58,237,0.07); bottom: -50px; left: -50px; }
+
+  .app { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { text-align: center; margin-bottom: 48px; animation: fadeDown 0.6s ease both; }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    background: rgba(0,212,255,0.05);
+  }
+
+  h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 12px; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: 15px; font-family: 'Space Mono', monospace; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+  /* ── HOME ── */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .menu-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 520px) { .menu-cards { grid-template-columns: 1fr; } }
+
+  .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  @media (max-width: 520px) { .mode-cards { grid-template-columns: 1fr; } }
+
+  .mode-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    text-align: left;
+  }
+
+  .mode-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
+
+  .mode-card.selected {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.06);
+  }
+
+  .mode-card.selected.study-mode {
+    border-color: var(--accent2);
+    background: rgba(124,58,237,0.06);
+  }
+
+  .mode-check {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    transition: all 0.2s;
+  }
+
+  .mode-card.selected .mode-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0e1a;
+  }
+
+  .mode-card.selected.study-mode .mode-check {
+    background: var(--accent2);
+    border-color: var(--accent2);
+  }
+
+  .mode-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+  .mode-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .mode-card p { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.5; }
+
+  .menu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+  }
+
+  .menu-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0; transition: opacity 0.25s; }
+  .menu-card.primary::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .menu-card.secondary::before { background: linear-gradient(90deg, var(--accent2), var(--accent3)); }
+  .menu-card:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .menu-card:hover::before { opacity: 1; }
+  .menu-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .menu-card h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .menu-card p { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; line-height: 1.5; }
+  .menu-stat { margin-top: 14px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.05em; }
+
+  .start-btn-wrap { display: flex; justify-content: center; margin-bottom: 28px; }
+
+  /* ── PROGRESS ── */
+  .quiz-topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .mode-pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+  .mode-pill.standard { color: var(--accent); border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.06); }
+  .mode-pill.study { color: var(--accent2); border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.08); }
+
+  .progress-wrap { flex: 1; }
+  .progress-info { display: flex; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .progress-info .q-num { color: var(--accent); }
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 12px rgba(0,212,255,0.4); }
+
+  /* ── QUESTION CARD ── */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px; margin-bottom: 20px; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .q-number { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 600; line-height: 1.5; }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+  .option {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    color: var(--text);
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .option:hover:not(.disabled) { border-color: var(--accent); background: rgba(0,212,255,0.05); transform: translateX(4px); }
+  .opt-letter {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .option.correct { border-color: var(--accent3); background: rgba(16,185,129,0.08); }
+  .option.correct .opt-letter { background: var(--accent3); border-color: var(--accent3); color: white; }
+  .option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+  .option.wrong .opt-letter { background: var(--danger); border-color: var(--danger); color: white; }
+  .option.disabled { cursor: default; }
+  .option.disabled:hover { transform: none; border-color: var(--border); background: var(--surface); }
+  .option.correct.disabled:hover { border-color: var(--accent3); background: rgba(16,185,129,0.08); }
+  .option.wrong.disabled:hover { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+
+  /* ── FEEDBACK (standard) ── */
+  .feedback { padding: 14px 18px; border-radius: 8px; font-size: 14px; font-family: 'Space Mono', monospace; margin-bottom: 20px; display: none; }
+  .feedback.show { display: flex; align-items: center; gap: 10px; animation: fadeIn 0.3s ease; }
+  .feedback.correct-fb { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+  .feedback.wrong-fb { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+  .feedback-icon { font-size: 18px; }
+
+  /* ── EXPLANATION PANEL (study mode) ── */
+  .explanation-panel {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    display: none;
+    animation: slideUp 0.4s ease;
+  }
+
+  .explanation-panel.show { display: block; }
+
+  .exp-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .exp-header-icon { font-size: 16px; }
+
+  .explanation-panel.correct-exp .exp-header {
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.35);
+    border-bottom: none;
+    color: #6ee7b7;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .explanation-panel.wrong-exp .exp-header {
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.35);
+    border-bottom: none;
+    color: #fca5a5;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .exp-body {
+    padding: 18px 20px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--surface2);
+    border-radius: 0 0 10px 10px;
+  }
+
+  .explanation-panel.correct-exp .exp-body {
+    border: 1px solid rgba(16,185,129,0.25);
+    border-top: none;
+  }
+
+  .explanation-panel.wrong-exp .exp-body {
+    border: 1px solid rgba(239,68,68,0.25);
+    border-top: none;
+  }
+
+  .exp-correct-note {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent3);
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 4px;
+    padding: 6px 12px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-row { display: flex; justify-content: space-between; align-items: center; }
+
+  .btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    padding: 12px 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 700;
+  }
+
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #0ea5e9); color: #0a0e1a; box-shadow: 0 0 20px rgba(0,212,255,0.25); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 24px rgba(0,212,255,0.4); }
+  .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-lg { padding: 14px 40px; font-size: 14px; }
+
+  /* ── SCORE ── */
+  .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 48px 40px; position: relative; overflow: hidden; text-align: center; }
+  .score-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3)); }
+  .score-label { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+  .score-big { font-size: 80px; font-weight: 800; line-height: 1; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .score-denom { font-size: 18px; color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 24px; }
+  .score-msg { font-size: 20px; font-weight: 600; margin-bottom: 32px; }
+  .score-breakdown { display: flex; gap: 24px; justify-content: center; margin-bottom: 36px; flex-wrap: wrap; }
+  .stat-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 16px 24px; min-width: 100px; }
+  .stat-val { font-size: 28px; font-weight: 800; font-family: 'Space Mono', monospace; }
+  .stat-val.green { color: var(--accent3); }
+  .stat-val.red { color: var(--danger); }
+  .stat-val.blue { color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+  .score-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 24px; }
+  .review-toggle { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); cursor: pointer; background: none; border: none; padding: 8px 0; letter-spacing: 0.05em; text-decoration: underline; }
+  .review-list { display: none; text-align: left; margin-top: 24px; }
+  .review-list.open { display: block; }
+  .review-item { border-bottom: 1px solid var(--border); padding: 16px 0; font-size: 14px; }
+  .review-q { font-weight: 600; margin-bottom: 8px; line-height: 1.5; }
+  .review-answer { font-family: 'Space Mono', monospace; font-size: 12px; }
+  .review-exp { font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 8px; padding: 10px 14px; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--border); }
+  .rc { color: var(--accent3); }
+  .rw { color: var(--danger); }
+
+  /* ── HISTORY ── */
+  .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .history-title { font-size: 24px; font-weight: 800; }
+  .empty-state { background: var(--surface); border: 1px dashed var(--border); border-radius: 12px; padding: 60px 40px; text-align: center; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-state h3 { font-size: 18px; margin-bottom: 8px; }
+  .empty-state p { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 13px; }
+  .best-banner { background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08)); border: 1px solid rgba(0,212,255,0.2); border-radius: 10px; padding: 16px 22px; display: flex; align-items: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+  .best-banner .bb-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .best-banner .bb-val { font-size: 22px; font-weight: 800; font-family: 'Space Mono', monospace; }
+  .bb-divider { width: 1px; height: 40px; background: var(--border); }
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-row { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; animation: slideUp 0.3s ease both; }
+  .h-rank { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); min-width: 28px; }
+  .h-rank.gold { color: #f59e0b; }
+  .h-rank.silver { color: #94a3b8; }
+  .h-rank.bronze { color: #b45309; }
+  .h-pct { font-size: 26px; font-weight: 800; font-family: 'Space Mono', monospace; min-width: 76px; }
+  .h-pct.high { color: var(--accent3); }
+  .h-pct.mid { color: var(--accent); }
+  .h-pct.low { color: var(--danger); }
+  .h-details { flex: 1; }
+  .h-raw { font-family: 'Space Mono', monospace; font-size: 13px; }
+  .h-date { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .h-meta { display: flex; gap: 8px; align-items: center; }
+  .h-grade { font-family: 'Space Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 4px; border: 1px solid; font-weight: 700; }
+  .h-mode-tag { font-family: 'Space Mono', monospace; font-size: 10px; padding: 3px 8px; border-radius: 4px; border: 1px solid; }
+  .tag-standard { color: var(--accent); border-color: rgba(0,212,255,0.25); background: rgba(0,212,255,0.05); }
+  .tag-study { color: var(--accent2); border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.07); }
+  .ga { color: var(--accent3); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+  .gb { color: var(--accent); border-color: rgba(0,212,255,0.3); background: rgba(0,212,255,0.08); }
+  .gc { color: var(--warn); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+  .gd { color: var(--danger); border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+
+<div class="app">
+  <header>
+    <div class="badge">26W Test Review</div>
+    <h1>Windows Server &amp;<br><span>Active Directory</span></h1>
+    <p class="subtitle">43 questions // multiple choice</p>
+  </header>
+
+  <!-- ══════════ HOME ══════════ -->
+  <div id="screen-home" class="screen active">
+    <div class="section-label">Select Mode</div>
+    <div class="mode-cards">
+      <div class="mode-card selected" id="mode-standard" onclick="selectMode('standard')">
+        <div class="mode-check">✓</div>
+        <span class="mode-icon">⚡</span>
+        <h3>Standard</h3>
+        <p>Answer all 43 questions. See right/wrong after each. Review at the end.</p>
+      </div>
+      <div class="mode-card study-mode" id="mode-study" onclick="selectMode('study')">
+        <div class="mode-check"></div>
+        <span class="mode-icon">🧠</span>
+        <h3>Study Mode</h3>
+        <p>Get a full explanation of why your answer is correct or incorrect after every question.</p>
+      </div>
+    </div>
+
+    <div class="section-label">Navigation</div>
+    <div class="menu-cards">
+      <div class="menu-card primary" onclick="startQuiz()">
+        <span class="menu-icon">🚀</span>
+        <h2>Start Quiz</h2>
+        <p>Begin a new attempt with your selected mode</p>
+        <div class="menu-stat" id="home-attempts">No attempts yet</div>
+      </div>
+      <div class="menu-card secondary" onclick="showHistory()">
+        <span class="menu-icon">📊</span>
+        <h2>Previous Scores</h2>
+        <p>View past attempts and track your progress</p>
+        <div class="menu-stat" id="home-best">No scores recorded</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ QUIZ ══════════ -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-topbar">
+      <div class="mode-pill" id="mode-pill">STANDARD</div>
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span class="q-num" id="q-counter">Question 1 of 43</span>
+          <span id="score-live">Score: 0</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="q-number" id="q-number">Q.01</div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="feedback" id="feedback">
+      <span class="feedback-icon" id="fb-icon"></span>
+      <span id="fb-text"></span>
+    </div>
+
+    <div class="explanation-panel" id="explanation-panel">
+      <div class="exp-header">
+        <span class="exp-header-icon" id="exp-icon"></span>
+        <span id="exp-title"></span>
+      </div>
+      <div class="exp-body" id="exp-body"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="showHome()">← MENU</button>
+      <button class="btn btn-primary" id="next-btn" disabled onclick="nextQuestion()">NEXT →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ RESULTS ══════════ -->
+  <div id="screen-results" class="screen">
+    <div class="score-card">
+      <div class="score-label">Quiz Complete</div>
+      <div class="score-big" id="pct-display">0%</div>
+      <div class="score-denom" id="raw-score">0 / 43 correct</div>
+      <div class="score-msg" id="score-msg"></div>
+      <div class="score-breakdown">
+        <div class="stat-box"><div class="stat-val green" id="correct-count">0</div><div class="stat-lbl">Correct</div></div>
+        <div class="stat-box"><div class="stat-val red" id="wrong-count">0</div><div class="stat-lbl">Incorrect</div></div>
+        <div class="stat-box"><div class="stat-val blue" id="pct-count">0%</div><div class="stat-lbl">Score</div></div>
+      </div>
+      <div class="score-actions">
+        <button class="btn btn-ghost" onclick="showHome()">← MENU</button>
+        <button class="btn btn-ghost" onclick="showHistory()">📊 ALL SCORES</button>
+        <button class="btn btn-primary" onclick="startQuiz()">↺ RETAKE</button>
+      </div>
+      <button class="review-toggle" onclick="toggleReview()">▾ Review Answers</button>
+      <div class="review-list" id="review-list"></div>
+    </div>
+  </div>
+
+  <!-- ══════════ HISTORY ══════════ -->
+  <div id="screen-history" class="screen">
+    <div class="history-header">
+      <div class="history-title">Previous Scores</div>
+      <button class="btn btn-ghost" onclick="showHome()">← MENU</button>
+    </div>
+    <div id="history-content"></div>
+  </div>
+</div>
+
+<script>
+// ── QUESTIONS WITH EXPLANATIONS ──────────────────────────
+const questions = [
+  {
+    q: "Which Active Directory partition holds configuration information that can affect the entire forest, such as how domain controllers should replicate?",
+    opts: ["Schema partition","Domain partition","Directory partition","Application partition"],
+    ans: 2,
+    exp: {
+      correct: "The Directory partition (also called the Configuration partition) stores forest-wide data including replication topology, sites, services, and how domain controllers communicate with each other. This data applies to every domain in the forest, which is why changes here replicate to all DCs.",
+      wrong: "The Schema partition defines object types and attributes. The Domain partition holds data specific to a single domain (users, computers, groups). The Application partition stores application-specific data. None of these handle replication configuration — that's the Directory (Configuration) partition."
+    }
+  },
+  {
+    q: "When should you choose a Windows Server 2019 Server Core installation?",
+    opts: ["When you absolutely cannot live without the GUI","When you want maximum resource efficiency and security","When running on a new domain's first server","When the server needs GUI-based management tools"],
+    ans: 1,
+    exp: {
+      correct: "Server Core removes the Desktop Experience (GUI), reducing the attack surface, memory usage, and disk footprint. It requires fewer patches and restarts. You manage it remotely via PowerShell, Server Manager, or RSAT. It's the recommended choice for most server roles where a GUI isn't needed.",
+      wrong: "If you cannot live without the GUI, you'd choose Desktop Experience — not Server Core. Server Core is actually a poor choice for a domain's very first server if you're still learning, since everything is CLI-based. It's also unsuitable if GUI-based management tools are required on the server itself."
+    }
+  },
+  {
+    q: "Schema attributes define what type of information is stored in each object (e.g., first name, last name, password). Which statement is TRUE?",
+    opts: ["Schema attributes are the same as Security Principals","Schema attributes define object data such as first name, last name, and password","Schema attributes only apply to computer objects","Schema attributes cannot be modified by administrators"],
+    ans: 1,
+    exp: {
+      correct: "Schema attributes specify the properties (fields) that objects can have. For a user object, attributes include givenName (first name), sn (last name), and unicodePwd (password). Attributes define *what* data is stored — schema classes define *which* objects exist.",
+      wrong: "Security Principals are entities (users, computers, groups) that can be assigned permissions — not the same as schema attributes. Attributes apply to all AD object types, not just computers. Administrators with Schema Admin rights can actually extend the schema by adding new attributes or classes."
+    }
+  },
+  {
+    q: "What defines which resources users can access and what level of access they have?",
+    opts: ["Schema attributes","Group Policy Objects","Security Principals","FSMO roles"],
+    ans: 2,
+    exp: {
+      correct: "Security Principals (users, computers, groups, and service accounts) are the entities that Active Directory assigns permissions to. Access Control Lists (ACLs) on resources reference Security Principals to define who can read, write, modify, or take ownership of an object.",
+      wrong: "Schema attributes define what data objects hold. GPOs manage configuration and policy settings (software installation, desktop restrictions) — not directly who can access which file or folder. FSMO roles are special DC roles for specific AD operations, not access control."
+    }
+  },
+  {
+    q: "Which two built-in user accounts does Windows create automatically?",
+    opts: ["Administrator and Guest","Administrator and User","Guest and Root","System and Administrator"],
+    ans: 0,
+    exp: {
+      correct: "Windows automatically creates two built-in local accounts: Administrator (full system control, disabled by default in newer Windows versions for security) and Guest (limited access, disabled by default). These exist on every Windows installation.",
+      wrong: "'User' is not a built-in account — it's a group. 'Root' is a Linux/Unix concept, not Windows. 'System' is a built-in security principal (NT AUTHORITY\\SYSTEM) used by the OS itself, but it's not a traditional user account you log in with."
+    }
+  },
+  {
+    q: "What feature of Active Directory ensures that changes to AD objects are automatically replicated to all domain controllers?",
+    opts: ["Single-master replication","KCC topology","Multimaster replication","SYSVOL synchronization"],
+    ans: 2,
+    exp: {
+      correct: "Multimaster replication allows any domain controller to accept and process changes to AD objects. When a change is made on one DC, it automatically replicates to all other DCs. This eliminates a single point of failure — unlike single-master models where only one server can accept writes.",
+      wrong: "Single-master replication (used in older systems like Windows NT) only allowed one server to accept changes — creating a bottleneck and single point of failure. KCC determines the replication *path* (topology), but doesn't itself replicate data. SYSVOL sync replicates Group Policy files and logon scripts, not all AD objects."
+    }
+  },
+  {
+    q: "What is the best method for configuring updates in Server Core and all computers in a Windows domain?",
+    opts: ["Windows Update GUI","WSUS only","Group Policy","PowerShell scripts"],
+    ans: 2,
+    exp: {
+      correct: "Group Policy is the best centralized method because it applies uniformly to all domain-joined computers — including Server Core machines that lack a GUI. GPO settings can point computers to a WSUS server, configure update schedules, and enforce update behavior without touching each machine individually.",
+      wrong: "Windows Update GUI doesn't exist on Server Core. WSUS alone manages update distribution but still needs Group Policy or manual config on each client to point to the WSUS server. PowerShell scripts can work but are harder to maintain at scale and don't persist as reliably as Group Policy."
+    }
+  },
+  {
+    q: "What runs on every DC to determine the replication topology?",
+    opts: ["FSMO role manager","Knowledge Consistency Checker (KCC)","Global Catalog server","Active Directory Sites and Services"],
+    ans: 1,
+    exp: {
+      correct: "The KCC is an automatic process running on every domain controller that calculates the most efficient replication connections between DCs. It creates and maintains replication connection objects, ensuring every DC can receive changes. Within a site it runs every 15 minutes; between sites it also factors in site link costs.",
+      wrong: "FSMO roles are special single-DC responsibilities (like PDC Emulator) — no single role is responsible for replication topology. The Global Catalog is a DC that holds a partial copy of all objects in the forest — it doesn't manage replication paths. Active Directory Sites and Services is the admin console for *viewing and overriding* topology, not what calculates it automatically."
+    }
+  },
+  {
+    q: "Which server is always configured as a Global Catalog (GC) server?",
+    opts: ["The first DC in the forest","The second DC in the forest","Any RODC","The PDC Emulator"],
+    ans: 0,
+    exp: {
+      correct: "The first domain controller installed in a new forest is automatically designated as the Global Catalog server. The GC stores a full copy of all objects in its domain and a partial (read-only) copy of objects from all other domains in the forest, enabling forest-wide searches and universal group membership resolution.",
+      wrong: "The second DC is not automatically made a GC — an admin must manually promote it or configure it. RODCs can be GCs but aren't automatically configured as one. The PDC Emulator is an FSMO role that handles password changes and time synchronization, not the initial GC designation."
+    }
+  },
+  {
+    q: "The Active Directory Recycle Bin is disabled by default and can be enabled in which tool?",
+    opts: ["Active Directory Users and Computers","Active Directory Sites and Services","Active Directory Administrative Center (ADAC)","Server Manager"],
+    ans: 2,
+    exp: {
+      correct: "The Active Directory Administrative Center (ADAC) provides a graphical interface to enable the AD Recycle Bin. Once enabled (it requires Windows Server 2008 R2 or higher forest functional level), deleted objects are preserved for a configurable period, allowing full restoration without restoring from backup.",
+      wrong: "Active Directory Users and Computers (ADUC) manages users, groups, and OUs but doesn't have the Recycle Bin toggle. Sites and Services manages replication topology and sites. Server Manager manages roles and features — not AD-level Recycle Bin configuration."
+    }
+  },
+  {
+    q: "Which command is the preferred method for installing Active Directory on Server Core?",
+    opts: ["Install-ADDSDomainController","dcpromo.exe","Add-WindowsFeature","netdom.exe"],
+    ans: 1,
+    exp: {
+      correct: "dcpromo.exe has historically been the tool used to promote a server to a domain controller via the command line. On Server Core (which has no GUI), it can be run with an answer file to perform unattended DC promotion. Note: In Windows Server 2012+, the PowerShell-based Install-ADDSDomainController is the modern replacement, but dcpromo remains the 'preferred' answer in this course context.",
+      wrong: "Install-ADDSDomainController is the newer PowerShell cmdlet (2012+) that replaced dcpromo in most scenarios. Add-WindowsFeature installs the AD DS role binaries but doesn't promote the server to a DC. netdom.exe is a command-line tool for domain management tasks (joining domains, trusts) — not for DC promotion."
+    }
+  },
+  {
+    q: "By default, does the Windows Server 2019 firewall block incoming ICMP Echo Request packets?",
+    opts: ["Yes, all ICMP is blocked by default","No, ICMP Echo Requests are allowed by default","Only on domain networks","Only on private networks"],
+    ans: 1,
+    exp: {
+      correct: "By default, Windows Server 2019's firewall does NOT block incoming ICMP Echo Requests (ping). This means the server responds to pings out of the box, which aids in network diagnostics and troubleshooting. Administrators can manually create firewall rules to block ICMP if desired.",
+      wrong: "ICMP Echo Requests are not blocked by default on Windows Server 2019 — the server is pingable immediately after installation. This is different from Windows desktop OS versions (like Windows 10/11) where ping is blocked by default on public and private profiles."
+    }
+  },
+  {
+    q: "Which Active Directory partition contains the information needed to define objects and object attributes for all domains in the forest?",
+    opts: ["Configuration partition","Directory partition","Domain partition","Schema partition"],
+    ans: 3,
+    exp: {
+      correct: "The Schema partition contains the blueprint for all AD objects — it defines every object class (like User, Computer, Group) and every attribute (like sAMAccountName, mail, memberOf). It's forest-wide, meaning there is only one Schema partition replicated to every DC in the forest. This ensures all domains use the same object definitions.",
+      wrong: "The Configuration partition holds forest-wide operational settings (sites, services, replication topology). The Domain partition stores the actual objects (users, groups, OUs) for a specific domain. Neither of these defines what types of objects and attributes are allowed — that's exclusively the Schema partition."
+    }
+  },
+  {
+    q: "Which of the following is one of the two forest-wide FSMO roles?",
+    opts: ["PDC Emulator","RID Master","Schema Master","Infrastructure Master"],
+    ans: 2,
+    exp: {
+      correct: "The Schema Master is one of the two forest-wide FSMO roles. It is the only DC that can make changes to the AD schema (adding new object classes or attributes). The other forest-wide role is the Domain Naming Master, which controls adding/removing domains in the forest. There is only one Schema Master per forest.",
+      wrong: "PDC Emulator, RID Master, and Infrastructure Master are all domain-wide FSMO roles — each domain in the forest has its own holder of these three roles. Only Schema Master and Domain Naming Master are forest-wide (one per entire forest)."
+    }
+  },
+  {
+    q: "What is the Microsoft term for a collection of bug fixes and security updates made since an OS release?",
+    opts: ["Hotfix","Service Pack","Cumulative Update","Patch Rollup"],
+    ans: 1,
+    exp: {
+      correct: "A Service Pack is a bundled collection of all patches, bug fixes, and updates released since the original OS launch (or since the last Service Pack). It's a convenient way to bring a system up to date in one installation rather than applying dozens of individual updates.",
+      wrong: "A Hotfix is a single targeted fix for one specific issue, often released urgently. A Cumulative Update is a modern Microsoft term (used more in Windows 10/11 and Server 2016+ era) that includes all previous updates. A Patch Rollup is typically a collection of patches for a specific component. 'Service Pack' is the classic term for this concept."
+    }
+  },
+  {
+    q: "When adding a server to an existing domain that should NOT run Active Directory or manage directory services, what should you choose?",
+    opts: ["Additional Domain Controller","Read-Only Domain Controller (RODC)","Member Server","Standalone Server"],
+    ans: 2,
+    exp: {
+      correct: "A Member Server is a server that has joined a domain but does NOT run Active Directory Domain Services. It benefits from domain authentication, Group Policy, and centralized management, but doesn't participate in AD replication or hold the AD database. File servers, print servers, and web servers are common member server roles.",
+      wrong: "An Additional DC runs AD DS and participates in replication. An RODC hosts a read-only copy of AD — it still runs directory services. A Standalone Server is not joined to any domain at all, so it wouldn't benefit from domain management. Member Server is the correct term for a domain-joined non-DC."
+    }
+  },
+  {
+    q: "What defines the objects that a Group Policy Object (GPO) affects?",
+    opts: ["Security Groups","Scope of Management (SOM)","Organizational Units","WMI Filters"],
+    ans: 1,
+    exp: {
+      correct: "The Scope of Management (SOM) defines which containers (Site, Domain, or OU) a GPO is linked to, and therefore which computers and users fall under its policies. When a GPO is linked to an OU, all user and computer objects within that OU (and sub-OUs by default) are in scope.",
+      wrong: "Security Groups can be used in Security Filtering to further restrict which objects within the SOM receive the policy, but they don't define the primary scope. OUs are containers where GPOs are linked — but the SOM is the broader concept that includes sites and domains too. WMI Filters apply conditional logic (e.g., only apply to Windows 10 machines) but don't define the primary scope."
+    }
+  },
+  {
+    q: "What server role is installed along with Active Directory Domain Services if no other servers with this role are available?",
+    opts: ["DHCP Server","File and Storage Services","DNS Server","Certificate Services"],
+    ans: 2,
+    exp: {
+      correct: "DNS Server is automatically installed alongside AD DS when no existing DNS server is detected on the network. Active Directory is heavily dependent on DNS — clients use DNS SRV records to locate domain controllers, and AD replication relies on DNS name resolution. Without DNS, AD simply cannot function.",
+      wrong: "DHCP assigns IP addresses automatically but is not required by or bundled with AD DS. File and Storage Services is a separate role for file sharing. Certificate Services provides PKI and is completely optional. Only DNS is tightly coupled to AD DS and auto-installed when necessary."
+    }
+  },
+  {
+    q: "Which of the following is NOT one of the three user account types defined in Windows Server 2019?",
+    opts: ["Local user accounts","Domain user accounts","Guest user accounts","Built-in user accounts"],
+    ans: 2,
+    exp: {
+      correct: "Guest user accounts are not one of the three defined account types. The three account types in Windows Server 2019 are: Local user accounts (stored on individual machines), Domain user accounts (stored in AD, valid across the domain), and Built-in user accounts (automatically created accounts like Administrator and Guest as a security principal — but 'Guest accounts' as a category is not the third type).",
+      wrong: "Local user accounts exist on the local machine only. Domain user accounts are stored in Active Directory and work across the domain. Built-in accounts (Administrator, etc.) are auto-created. 'Guest user accounts' as a standalone category is not one of the three defined types — Guest is a specific built-in account, not a separate account type category."
+    }
+  },
+  {
+    q: "What boot mode can be used to perform restoration if critical parts of Active Directory are accidentally deleted?",
+    opts: ["Safe Mode","Directory Services Restore Mode (DSRM)","Last Known Good Configuration","Recovery Console"],
+    ans: 1,
+    exp: {
+      correct: "Directory Services Restore Mode (DSRM) is a special boot mode for domain controllers that loads the server without starting Active Directory. This allows an administrator to restore the AD database (ntds.dit) from backup. DSRM has its own local administrator password set during DC promotion.",
+      wrong: "Safe Mode on a DC still starts Active Directory services in a limited way — it's not designed for AD database restoration. Last Known Good Configuration restores registry settings from the last successful boot but won't help with deleted AD objects. Recovery Console is a Windows XP/2003-era tool for fixing boot issues, not AD restoration."
+    }
+  },
+  {
+    q: "What folder under Policies in the Computer Configuration Node of a GPO contains the Control Panel, Network, Printers, System, and Windows Component folders?",
+    opts: ["Software Settings","Windows Settings","Administrative Templates","Security Settings"],
+    ans: 2,
+    exp: {
+      correct: "Administrative Templates contains registry-based policy settings organized into folders including Control Panel, Network, Printers, System, and Windows Components. These settings modify registry keys on target computers. Administrative Templates are the most extensive section of a GPO, covering thousands of configurable settings.",
+      wrong: "Software Settings is used for software installation (assigning or publishing applications via GPO). Windows Settings contains security settings, scripts, and folder redirection — not the Control Panel/Network/System folder structure. Security Settings handles account policies, audit policies, and user rights assignments."
+    }
+  },
+  {
+    q: "What Windows servers are the ONLY domain controllers that hold universal group membership information?",
+    opts: ["PDC Emulators","Read-Only Domain Controllers","Global Catalog servers","Infrastructure Masters"],
+    ans: 2,
+    exp: {
+      correct: "Global Catalog (GC) servers store universal group membership information for the entire forest. When a user logs on, the DC contacts a GC server to retrieve the user's universal group memberships, which are needed to build a complete access token. Without a GC, users may not be able to log on (except with cached credentials).",
+      wrong: "PDC Emulators handle password changes, time sync, and legacy NT support — not universal group membership. RODCs hold a read-only subset of AD data but specifically exclude sensitive attributes; universal group membership is typically not stored on RODCs. Infrastructure Masters track cross-domain object references — not group membership data."
+    }
+  },
+  {
+    q: "What is the primary container object for organizing and managing resources in a domain?",
+    opts: ["Domain","Site","Organizational Unit (OU)","Group"],
+    ans: 2,
+    exp: {
+      correct: "Organizational Units (OUs) are the primary container for organizing users, computers, groups, and other objects within a domain. Admins use OUs to delegate administrative control (e.g., give the Help Desk OU admin rights over a specific OU) and to apply Group Policy in a targeted way.",
+      wrong: "Domains are top-level administrative boundaries, not containers for organizing objects within a domain. Sites represent physical network locations for controlling replication and logon traffic — not for organizing domain objects. Groups are used for assigning permissions and managing access, but are not containers for organizing AD objects."
+    }
+  },
+  {
+    q: "Which operations master role provides backward compatibility with Windows NT backup domain controllers?",
+    opts: ["Schema Master","PDC Emulator","RID Master","Infrastructure Master"],
+    ans: 1,
+    exp: {
+      correct: "The PDC Emulator acts as a Windows NT 4.0 Primary Domain Controller for any legacy NT Backup Domain Controllers (BDCs) still on the network. It's the authoritative time source for the domain, processes password changes (replicates them faster), and handles account lockout policies. It's the busiest FSMO role.",
+      wrong: "Schema Master controls schema changes. RID Master allocates pools of Relative Identifiers (RIDs) to DCs so they can create new security principals without conflicts. Infrastructure Master tracks references to objects in other domains. Only the PDC Emulator has the backward compatibility function for NT 4.0 BDCs."
+    }
+  },
+  {
+    q: "Which of the following stores information about a computer network and offers features for retrieving and managing that information?",
+    opts: ["DNS Server","DHCP Server","Active Directory","Group Policy"],
+    ans: 2,
+    exp: {
+      correct: "Active Directory is a directory service — its core purpose is to store, organize, and provide access to information about network resources (users, computers, printers, applications). It offers LDAP-based querying, authentication via Kerberos, and authorization through access control lists.",
+      wrong: "DNS stores name-to-IP mappings and is used for name resolution — it's not a general-purpose network information store. DHCP dynamically assigns IP addresses to devices — it manages leases, not a general resource directory. Group Policy is a configuration management system built on top of AD, not a directory store itself."
+    }
+  },
+  {
+    q: "Which PowerShell cmdlet can a network administrator use to join a computer to a domain?",
+    opts: ["Add-Computer","Join-Domain","Set-DomainMember","Connect-ADDomain"],
+    ans: 0,
+    exp: {
+      correct: "Add-Computer is the correct PowerShell cmdlet for joining a computer to a domain. Example usage: Add-Computer -DomainName 'contoso.com' -Credential (Get-Credential) -Restart. It can also add a computer to a workgroup. This cmdlet is part of the Microsoft.PowerShell.Management module.",
+      wrong: "Join-Domain, Set-DomainMember, and Connect-ADDomain are not valid PowerShell cmdlets. They may sound plausible but don't exist in Windows PowerShell. Always remember: Add-Computer for joining, Remove-Computer for leaving a domain."
+    }
+  },
+  {
+    q: "Which PowerShell cmdlet will install the Active Directory Domain Services role?",
+    opts: ["Add-ADDSRole","Install-WindowsFeature AD-Domain-Services","Enable-ADDomainServices","Set-ADDSRole"],
+    ans: 1,
+    exp: {
+      correct: "Install-WindowsFeature AD-Domain-Services installs the AD DS role binaries and management tools on a Windows Server. This is the first step — it installs the software. The second step is promotion (using Install-ADDSDomainController or similar) to actually make the server a DC. You can also add -IncludeManagementTools to get RSAT tools.",
+      wrong: "Add-ADDSRole, Enable-ADDomainServices, and Set-ADDSRole are not real PowerShell cmdlets. The correct module for role management is ServerManager, and the correct cmdlet is Install-WindowsFeature (or its alias Add-WindowsFeature)."
+    }
+  },
+  {
+    q: "What type of application is made available via Group Policy for a user to install through Programs and Features in Control Panel?",
+    opts: ["Assigned application","Published application","Deployed application","Managed application"],
+    ans: 1,
+    exp: {
+      correct: "A Published application is made available to users but not automatically installed. It appears in Programs and Features (Add/Remove Programs) or the Software Center, and the user can choose to install it on demand. Publishing is user-targeted (not computer-targeted). If the user doesn't want it, they don't have to install it.",
+      wrong: "An Assigned application is automatically installed — it either appears on the Start menu (user-assigned) and installs on first use, or is fully installed on the computer at startup (computer-assigned). 'Deployed' and 'Managed' are not standard GPO software installation categories. The two official types are Assigned and Published."
+    }
+  },
+  {
+    q: "What type of Active Directory replication takes place between domain controllers in the same site?",
+    opts: ["Intersite replication","Scheduled replication","Intrasite replication","Bridgehead replication"],
+    ans: 2,
+    exp: {
+      correct: "Intrasite replication occurs between DCs within the same AD site (a site representing a fast, well-connected network segment). It's triggered by change notification (nearly immediate — within 15 seconds by default) and is uncompressed since bandwidth is assumed to be plentiful on a LAN.",
+      wrong: "Intersite replication happens between DCs in *different* sites and is scheduled (to control traffic over slower WAN links) and compressed. Scheduled replication is the mechanism used for intersite, not intrasite. Bridgehead servers are the DCs designated to handle intersite replication traffic — they're involved in intersite, not intrasite replication."
+    }
+  },
+  {
+    q: "How long does it take for a change made on a domain controller to trigger intrasite replication?",
+    opts: ["Immediately","15 seconds","5 minutes","15 minutes"],
+    ans: 1,
+    exp: {
+      correct: "After a change is made on a DC, it waits 15 seconds before sending a change notification to its replication partners (this delay allows for additional changes to be batched). The receiving DC then pulls the changes. For urgent changes (like password changes), replication is triggered immediately to the PDC Emulator.",
+      wrong: "Replication is not instantaneous — the 15-second delay is intentional to batch multiple rapid changes. 5 minutes would be too slow for a LAN environment. 15 minutes is more typical of intersite replication scheduling over WAN links, not intrasite LAN replication."
+    }
+  },
+  {
+    q: "In what order are Group Policy settings applied?",
+    opts: ["Site, Domain, OU, Local","Local, Site, Domain, OU","Domain, Site, OU, Local","OU, Domain, Site, Local"],
+    ans: 1,
+    exp: {
+      correct: "GPOs are processed in LSDOU order: Local → Site → Domain → OU (and nested OUs from parent to child). Later-applied policies win when there's a conflict, so OU settings take precedence over Domain, which takes precedence over Site, which overrides Local. This is important to understand for troubleshooting unexpected policy behavior.",
+      wrong: "Starting with Site, Domain, or OU would be incorrect — Local policy is always processed first. 'OU, Domain, Site, Local' is the reverse of the correct order. Remember the mnemonic: 'Local Students Drink OJ' or simply LSDOU — the order in which they're applied (and later wins)."
+    }
+  },
+  {
+    q: "Which of the following defines Active Directory objects and their attributes and can be changed by an administrator or application?",
+    opts: ["Security Principals","Group Policy","The Schema","The Configuration partition"],
+    ans: 2,
+    exp: {
+      correct: "The Schema is the master blueprint of Active Directory. It defines every class of object (User, Computer, Printer, etc.) and every attribute those objects can have. Schema Admins can extend the schema by adding new classes or attributes. Applications like Microsoft Exchange extend the schema during installation to add mail-related attributes to user objects.",
+      wrong: "Security Principals are entities (users, computers, groups) assigned permissions — they don't define object structures. Group Policy manages configuration settings for computers and users — it doesn't define AD object structure. The Configuration partition stores operational/topology data, not object class/attribute definitions."
+    }
+  },
+  {
+    q: "Which type of DNS record is used to map a domain name to an IP address?",
+    opts: ["MX record","PTR record","A record","CNAME record"],
+    ans: 2,
+    exp: {
+      correct: "An A record (Address record) maps a hostname/domain name to an IPv4 address. For example: server1.contoso.com → 192.168.1.10. For IPv6 addresses, the equivalent is an AAAA record. A records are the most fundamental type in DNS and are used constantly for name resolution.",
+      wrong: "MX (Mail Exchanger) records specify which mail servers accept email for a domain. PTR (Pointer) records do the *reverse* — they map an IP address back to a hostname (used in reverse DNS lookups). CNAME (Canonical Name) records create aliases pointing one hostname to another hostname, not directly to an IP."
+    }
+  },
+  {
+    q: "What does the TTL (Time to Live) value in a DNS record represent?",
+    opts: ["The time a DNS server has been running","How long a DNS record can be cached before it must be refreshed","The maximum lifespan of a domain name registration","The interval between zone transfers"],
+    ans: 1,
+    exp: {
+      correct: "TTL specifies (in seconds) how long a DNS resolver or caching server can store a record before it must query the authoritative DNS server again for a fresh copy. A TTL of 3600 means the record can be cached for 1 hour. Lower TTLs mean faster propagation of changes but more DNS query traffic.",
+      wrong: "TTL has nothing to do with server uptime or domain registration length. Zone transfer intervals are configured separately in the SOA record's refresh and retry fields. TTL is purely about cache expiration time for DNS records."
+    }
+  },
+  {
+    q: "Which zone file is responsible for resolving names to IP addresses?",
+    opts: ["Reverse lookup zone","Stub zone","Forward lookup zone","Secondary zone"],
+    ans: 2,
+    exp: {
+      correct: "The Forward Lookup Zone resolves hostnames/FQDNs to IP addresses — the most common type of DNS query. When a client asks 'what is the IP of server1.contoso.com?', the forward lookup zone provides the A or AAAA record answer.",
+      wrong: "The Reverse Lookup Zone does the opposite — it resolves IP addresses back to hostnames (using PTR records). A Stub Zone holds only the NS records and SOA for another zone, used for conditional forwarding scenarios. A Secondary Zone is a read-only copy of a primary zone stored on another DNS server for redundancy."
+    }
+  },
+  {
+    q: "What is the default path to DNS files on a Windows Server?",
+    opts: ["C:\\Windows\\System32\\dns","C:\\Windows\\dns","C:\\Windows\\System32\\drivers\\etc","C:\\Program Files\\DNS"],
+    ans: 0,
+    exp: {
+      correct: "DNS zone files and configuration data are stored in C:\\Windows\\System32\\dns by default on Windows DNS Server. This folder contains .dns zone files (if using file-based zones) and the DNS server configuration. When using AD-integrated zones, data is stored in Active Directory instead, but the folder is still used for cache and boot files.",
+      wrong: "C:\\Windows\\dns doesn't exist as a standard path. C:\\Windows\\System32\\drivers\\etc contains the hosts file and other network configuration files (lmhosts, networks) — not DNS zone files. C:\\Program Files\\DNS is not a real Windows DNS path."
+    }
+  },
+  {
+    q: "Which resource record stores zone transfer settings?",
+    opts: ["NS record","SOA record","SRV record","AAAA record"],
+    ans: 1,
+    exp: {
+      correct: "The SOA (Start of Authority) record is the first record in every DNS zone and contains zone administrative information including: the primary DNS server name, admin email, serial number (for change tracking), refresh interval (how often secondary servers check for updates), retry interval, expire time, and minimum TTL. Zone transfer settings (refresh, retry, expire) are all in the SOA.",
+      wrong: "NS (Name Server) records list the authoritative DNS servers for a zone but don't contain transfer settings. SRV records specify the location of services (like _ldap._tcp for AD). AAAA records map hostnames to IPv6 addresses. Only SOA contains the operational/transfer configuration for a zone."
+    }
+  },
+  {
+    q: "You have multiple remote locations connected by slow satellite links. What type of DNS servers should be installed in the remote locations so clients can locate authoritative DNS servers?",
+    opts: ["Secondary DNS servers","Stub zone servers","Caching-only DNS servers","Forwarder-only DNS servers"],
+    ans: 2,
+    exp: {
+      correct: "Caching-only DNS servers don't host any zones — they simply forward queries, receive answers, and cache them locally. For remote offices on slow links, a caching-only server means clients query the local DNS server (fast LAN), which only needs to go over the slow satellite link once per unique query. Subsequent requests for the same record are answered from cache without crossing the WAN.",
+      wrong: "Secondary DNS servers hold a read-only copy of a zone via zone transfer — requiring periodic zone transfer traffic over your already slow satellite link. Stub zones only hold NS and SOA records, which still requires the slow link for most queries. Forwarder-only servers would still forward every query over the satellite link with no caching benefit."
+    }
+  },
+  {
+    q: "What does FQDN stand for?",
+    opts: ["Fully Qualified Domain Name","Forwarded Query Domain Notation","Full Query DNS Node","Functional Qualified DNS Name"],
+    ans: 0,
+    exp: {
+      correct: "FQDN stands for Fully Qualified Domain Name. It's the complete, unambiguous domain name specifying a host's exact location in the DNS hierarchy — for example, server1.contoso.com. (note the trailing dot in formal notation, representing the root). FQDNs are used in DNS records, SSL certificates, and AD configuration.",
+      wrong: "The other options are fabricated terms that don't exist in networking or DNS. FQDN is a foundational networking term: Fully Qualified Domain Name — 'fully qualified' meaning every level of the hierarchy is specified, leaving no ambiguity."
+    }
+  },
+  {
+    q: "What is the key difference between a Domain Administrator account and a Local Administrator account?",
+    opts: ["Domain Admins can only manage one domain; Local Admins manage the entire forest","Domain Admins have authority across the domain; Local Admins only have authority on the local machine","They have identical permissions but different names","Local Admins can manage all servers; Domain Admins only manage workstations"],
+    ans: 1,
+    exp: {
+      correct: "A Domain Administrator account is stored in Active Directory and has administrative privileges across all computers in the domain (by default, Domain Admins are added to the local Administrators group on every domain-joined machine). A Local Administrator account exists only on one machine and has no authority beyond that device.",
+      wrong: "Domain Admins have authority across the *entire domain* (and potentially the forest with Enterprise Admin rights) — not limited to one domain. Local Admins have no cross-machine authority whatsoever. They are definitionally different in scope, not just in name."
+    }
+  },
+  {
+    q: "Before a server can become a Domain Controller, what two roles must be installed?",
+    opts: ["DNS Server and DHCP Server","Active Directory Domain Services (AD DS) and DNS Server","Active Directory Domain Services (AD DS) and File Services","DNS Server and Certificate Services"],
+    ans: 1,
+    exp: {
+      correct: "To promote a server to a domain controller, the AD DS role must be installed first (which installs the necessary binaries). DNS Server is also required because AD is entirely dependent on DNS for locating domain controllers, replication, and client authentication. If no DNS server exists on the network, the AD DS installation wizard will offer to install DNS automatically.",
+      wrong: "DHCP is useful in a network but not required for a DC. File Services and Certificate Services are optional roles with no dependency on DC promotion. The mandatory combination is AD DS (to become a DC) + DNS (for AD to function). Without both, promotion will either fail or result in a non-functional AD environment."
+    }
+  },
+  {
+    q: "What is Active Directory?",
+    opts: ["A file system used to store server backups","A directory service that stores information about network resources and provides authentication and authorization","A Windows feature for managing local user accounts only","A DNS management tool"],
+    ans: 1,
+    exp: {
+      correct: "Active Directory is Microsoft's directory service for Windows domain networks. It stores information about network resources (users, computers, printers, applications, policies) and provides two core security services: Authentication (verifying identity via Kerberos or NTLM) and Authorization (determining what authenticated users can access). It's the central management system for enterprise Windows environments.",
+      wrong: "Active Directory is not a backup system, file system, or DNS tool. It does include DNS integration, but DNS is a supporting component — not what AD *is*. AD manages domain accounts, not just local accounts. Local accounts are managed by each machine's SAM database independently."
+    }
+  },
+  {
+    q: "Do all servers that join a Windows domain need to be Domain Controllers to operate Active Directory Domain Services properly?",
+    opts: ["Yes, every server must be a Domain Controller","No, servers can join the domain as member servers without being Domain Controllers","Only servers running Windows Server 2019 must be Domain Controllers","Only file servers must be Domain Controllers"],
+    ans: 1,
+    exp: {
+      correct: "Absolutely not — most servers in a domain are member servers, not domain controllers. A member server is domain-joined (subject to Group Policy, using domain authentication) but does NOT run AD DS, does not hold the AD database, and does not replicate AD data. File servers, web servers, print servers, and application servers are all typically member servers.",
+      wrong: "Requiring every server to be a DC would be a massive security risk and administrative nightmare. DCs hold the AD database and should be kept lean and protected. Separating roles (DC vs. member server) is a fundamental best practice. OS version has no bearing on whether a server must be a DC."
+    }
+  }
+];
+
+const letters = ['A','B','C','D'];
+let current = 0, score = 0, answered = false, userAnswers = [];
+let scoreHistory = [];
+let currentMode = 'standard'; // 'standard' | 'study'
+
+// ── MODE SELECTION ────────────────────────────────────────
+function selectMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-standard').classList.toggle('selected', mode === 'standard');
+  document.getElementById('mode-study').classList.toggle('selected', mode === 'study');
+  const stdCheck = document.querySelector('#mode-standard .mode-check');
+  const studyCheck = document.querySelector('#mode-study .mode-check');
+  stdCheck.textContent = mode === 'standard' ? '✓' : '';
+  studyCheck.textContent = mode === 'study' ? '✓' : '';
+}
+selectMode('standard');
+
+// ── SCREENS ───────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showHome() {
+  const att = document.getElementById('home-attempts');
+  const best = document.getElementById('home-best');
+  if (scoreHistory.length === 0) {
+    att.textContent = 'No attempts yet';
+    best.textContent = 'No scores recorded';
+  } else {
+    att.textContent = `${scoreHistory.length} attempt${scoreHistory.length !== 1 ? 's' : ''} taken`;
+    best.textContent = `Best score: ${Math.max(...scoreHistory.map(s => s.pct))}%`;
+  }
+  showScreen('screen-home');
+}
+
+// ── QUIZ ──────────────────────────────────────────────────
+function startQuiz() {
+  current = 0; score = 0; answered = false; userAnswers = [];
+  const pill = document.getElementById('mode-pill');
+  if (currentMode === 'study') {
+    pill.textContent = 'STUDY MODE';
+    pill.className = 'mode-pill study';
+  } else {
+    pill.textContent = 'STANDARD';
+    pill.className = 'mode-pill standard';
+  }
+  showScreen('screen-quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  document.getElementById('q-counter').textContent = `Question ${current+1} of ${questions.length}`;
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+  document.getElementById('q-number').textContent = `Q.${String(current+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+
+  const optDiv = document.getElementById('options');
+  optDiv.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.style.cssText = `animation: slideUp 0.35s ease ${i * 0.05}s both`;
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optDiv.appendChild(btn);
+  });
+
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('explanation-panel').className = 'explanation-panel';
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = true;
+  nextBtn.textContent = current < questions.length - 1 ? 'NEXT →' : 'FINISH →';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach(o => o.classList.add('disabled'));
+  userAnswers[current] = idx;
+
+  const isCorrect = idx === q.ans;
+  if (isCorrect) score++;
+
+  opts[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[q.ans].classList.add('correct');
+
+  document.getElementById('score-live').textContent = `Score: ${score}`;
+
+  if (currentMode === 'study') {
+    // Show rich explanation panel
+    const panel = document.getElementById('explanation-panel');
+    const expIcon = document.getElementById('exp-icon');
+    const expTitle = document.getElementById('exp-title');
+    const expBody = document.getElementById('exp-body');
+
+    if (isCorrect) {
+      panel.className = 'explanation-panel show correct-exp';
+      expIcon.textContent = '✓';
+      expTitle.textContent = 'Correct — Here\'s Why';
+      expBody.innerHTML = q.exp.correct;
+    } else {
+      panel.className = 'explanation-panel show wrong-exp';
+      expIcon.textContent = '✗';
+      expTitle.textContent = `Incorrect — Here's the Explanation`;
+      expBody.innerHTML = q.exp.wrong +
+        `<div class="exp-correct-note">✓ Correct answer: ${letters[q.ans]}: ${q.opts[q.ans]}</div>`;
+    }
+    document.getElementById('feedback').className = 'feedback'; // hide simple feedback in study mode
+  } else {
+    // Simple feedback for standard mode
+    const fb = document.getElementById('feedback');
+    if (isCorrect) {
+      fb.className = 'feedback show correct-fb';
+      document.getElementById('fb-icon').textContent = '✓';
+      document.getElementById('fb-text').textContent = 'Correct!';
+    } else {
+      fb.className = 'feedback show wrong-fb';
+      document.getElementById('fb-icon').textContent = '✗';
+      document.getElementById('fb-text').textContent = `Incorrect. Correct: ${letters[q.ans]}: ${q.opts[q.ans]}`;
+    }
+  }
+
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) finishQuiz();
+  else loadQuestion();
+}
+
+function finishQuiz() {
+  const pct = Math.round((score / questions.length) * 100);
+  const now = new Date();
+  scoreHistory.unshift({
+    score, total: questions.length, pct,
+    mode: currentMode,
+    date: now.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' }) +
+          ' · ' + now.toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit' })
+  });
+
+  showScreen('screen-results');
+  document.getElementById('pct-display').textContent = pct + '%';
+  document.getElementById('raw-score').textContent = `${score} / ${questions.length} correct`;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent = questions.length - score;
+  document.getElementById('pct-count').textContent = pct + '%';
+
+  const msgs = [[90,'🏆 Outstanding! Excellent mastery.'],[80,'🎉 Great work! Strong understanding.'],[70,'👍 Good effort. Review the missed questions.'],[60,'📚 Keep studying — you\'re getting there.'],[-1,'💪 More review needed. Don\'t give up!']];
+  document.getElementById('score-msg').textContent = (msgs.find(([t]) => pct >= t) || msgs[4])[1];
+  document.getElementById('review-list').className = 'review-list';
+}
+
+function toggleReview() {
+  const list = document.getElementById('review-list');
+  if (list.classList.contains('open')) { list.classList.remove('open'); return; }
+  list.innerHTML = questions.map((q, i) => {
+    const ua = userAnswers[i];
+    const correct = ua === q.ans;
+    return `<div class="review-item">
+      <div class="review-q">${i+1}. ${q.q}</div>
+      <div class="review-answer ${correct ? 'rc' : 'rw'}">${correct ? '✓' : '✗'} Your answer: ${ua !== undefined ? letters[ua] + ': ' + q.opts[ua] : 'Not answered'}</div>
+      ${!correct ? `<div class="review-answer rc" style="margin-top:4px">✓ Correct: ${letters[q.ans]}: ${q.opts[q.ans]}</div>` : ''}
+      <div class="review-exp">${correct ? q.exp.correct : q.exp.wrong}</div>
+    </div>`;
+  }).join('');
+  list.classList.add('open');
+}
+
+// ── HISTORY ───────────────────────────────────────────────
+function showHistory() {
+  const c = document.getElementById('history-content');
+  if (scoreHistory.length === 0) {
+    c.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><h3>No scores yet</h3><p>Complete a quiz to see your scores here.</p></div>`;
+    showScreen('screen-history');
+    return;
+  }
+
+  const best = Math.max(...scoreHistory.map(s => s.pct));
+  const avg = Math.round(scoreHistory.reduce((a,b) => a + b.pct, 0) / scoreHistory.length);
+
+  const rows = scoreHistory.map((s, i) => {
+    const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+    const pctClass = s.pct >= 80 ? 'high' : s.pct >= 60 ? 'mid' : 'low';
+    const [grade, gc] = s.pct >= 90 ? ['A','ga'] : s.pct >= 80 ? ['B','gb'] : s.pct >= 70 ? ['C','gc'] : ['D','gd'];
+    const modeTag = s.mode === 'study'
+      ? '<span class="h-mode-tag tag-study">STUDY</span>'
+      : '<span class="h-mode-tag tag-standard">STANDARD</span>';
+    return `<div class="history-row" style="animation-delay:${i*0.05}s">
+      <div class="h-rank ${rankClass}">#${i+1}</div>
+      <div class="h-pct ${pctClass}">${s.pct}%</div>
+      <div class="h-details">
+        <div class="h-raw">${s.score} / ${s.total} correct</div>
+        <div class="h-date">${s.date}</div>
+      </div>
+      <div class="h-meta">${modeTag}<span class="h-grade ${gc}">${grade}</span></div>
+    </div>`;
+  }).join('');
+
+  c.innerHTML = `
+    <div class="best-banner">
+      <div><div class="bb-label">Best Score</div><div class="bb-val" style="color:var(--accent)">${best}%</div></div>
+      <div class="bb-divider"></div>
+      <div><div class="bb-label">Average</div><div class="bb-val" style="color:var(--accent2)">${avg}%</div></div>
+      <div class="bb-divider"></div>
+      <div><div class="bb-label">Attempts</div><div class="bb-val" style="color:var(--text);font-size:18px">${scoreHistory.length}</div></div>
+    </div>
+    <div class="history-list">${rows}</div>`;
+
+  showScreen('screen-history');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CST8208 — Midterm Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --border: #1e1e2e;
+    --accent: #00e5ff;
+    --accent2: #ff4d6d;
+    --accent3: #b8ff65;
+    --text: #e8e8f0;
+    --muted: #666680;
+    --correct: #b8ff65;
+    --incorrect: #ff4d6d;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    position: relative;
+    z-index: 1;
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .header-left .course-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .course-tag::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .score-badge {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: rgba(184,255,101,0.08);
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    padding: 8px 16px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .progress-bar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 40px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-count {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-card:nth-child(1) { animation-delay: 0.05s; }
+  .question-card:nth-child(2) { animation-delay: 0.1s; }
+  .question-card:nth-child(3) { animation-delay: 0.15s; }
+  .question-card:nth-child(4) { animation-delay: 0.2s; }
+  .question-card:nth-child(5) { animation-delay: 0.25s; }
+  .question-card:nth-child(6) { animation-delay: 0.3s; }
+  .question-card:nth-child(7) { animation-delay: 0.35s; }
+  .question-card:nth-child(8) { animation-delay: 0.4s; }
+  .question-card:nth-child(9) { animation-delay: 0.45s; }
+  .question-card:nth-child(10) { animation-delay: 0.5s; }
+  .question-card:nth-child(11) { animation-delay: 0.55s; }
+  .question-card:nth-child(12) { animation-delay: 0.6s; }
+  .question-card:nth-child(13) { animation-delay: 0.65s; }
+  .question-card:nth-child(14) { animation-delay: 0.7s; }
+  .question-card:nth-child(15) { animation-delay: 0.75s; }
+  .question-card:nth-child(16) { animation-delay: 0.8s; }
+
+  .question-card.answered-correct { border-color: rgba(184,255,101,0.3); }
+  .question-card.answered-wrong { border-color: rgba(255,77,109,0.3); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .q-text {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  .q-type {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .q-body { padding: 20px 24px; }
+
+  /* Multiple choice */
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 14px;
+    text-align: left;
+    color: var(--text);
+    width: 100%;
+    font-family: var(--sans);
+  }
+
+  .option:hover:not(:disabled) {
+    background: rgba(0,229,255,0.06);
+    border-color: rgba(0,229,255,0.3);
+  }
+
+  .option .opt-key {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .option.correct {
+    background: rgba(184,255,101,0.08);
+    border-color: rgba(184,255,101,0.4);
+    color: var(--correct);
+  }
+  .option.correct .opt-key { background: rgba(184,255,101,0.2); color: var(--correct); }
+
+  .option.wrong {
+    background: rgba(255,77,109,0.08);
+    border-color: rgba(255,77,109,0.4);
+    color: var(--incorrect);
+  }
+  .option.wrong .opt-key { background: rgba(255,77,109,0.2); color: var(--incorrect); }
+
+  .option.reveal-correct {
+    background: rgba(184,255,101,0.04);
+    border-color: rgba(184,255,101,0.2);
+    color: rgba(184,255,101,0.6);
+  }
+
+  /* Flashcard (reveal) style */
+  .flashcard {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .flashcard-front,
+  .flashcard-back {
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .flashcard-front {
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px;
+    transition: all 0.2s;
+  }
+
+  .flashcard-front:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .flashcard-back {
+    display: none;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.2);
+  }
+
+  .flashcard-back.visible { display: block; }
+  .flashcard-front.hidden { display: none; }
+
+  .answer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .answer-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .answer-table tr:last-child { border-bottom: none; }
+
+  .answer-table td {
+    padding: 8px 12px;
+    vertical-align: top;
+  }
+
+  .answer-table td:first-child {
+    color: var(--muted);
+    white-space: nowrap;
+    width: 40%;
+  }
+
+  .answer-table td:last-child {
+    color: var(--accent);
+  }
+
+  /* XOR calculator */
+  .xor-calc {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .xor-inputs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .xor-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .xor-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .xor-input {
+    font-family: var(--mono);
+    font-size: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .xor-input:focus { border-color: var(--accent); }
+
+  .xor-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: all 0.2s;
+  }
+
+  .xor-btn:hover { background: rgba(0,229,255,0.2); }
+
+  .xor-result {
+    font-family: var(--mono);
+    font-size: 13px;
+    background: rgba(184,255,101,0.06);
+    border: 1px solid rgba(184,255,101,0.2);
+    color: var(--accent3);
+    padding: 12px 16px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .xor-result.show { display: block; }
+
+  /* Reset button */
+  .q-footer {
+    padding: 0 24px 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .reset-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { color: var(--text); border-color: var(--muted); }
+
+  .feedback {
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 14px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  .feedback.correct {
+    display: block;
+    background: rgba(184,255,101,0.08);
+    color: var(--correct);
+    border: 1px solid rgba(184,255,101,0.2);
+  }
+
+  .feedback.wrong {
+    display: block;
+    background: rgba(255,77,109,0.08);
+    color: var(--incorrect);
+    border: 1px solid rgba(255,77,109,0.2);
+  }
+
+  /* Final score */
+  #final-score {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,15,0.95);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  #final-score.show { display: flex; }
+
+  .final-inner {
+    text-align: center;
+    max-width: 400px;
+    padding: 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .final-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .final-score-num {
+    font-family: var(--sans);
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .final-score-num.good { color: var(--correct); }
+  .final-score-num.ok { color: var(--accent); }
+  .final-score-num.bad { color: var(--incorrect); }
+
+  .final-msg {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .final-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .final-btn:hover { background: rgba(0,229,255,0.2); }
+
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 24px; }
+    main { padding: 24px 16px 60px; }
+    .q-header { padding: 16px; }
+    .q-body { padding: 16px; }
+    .q-footer { padding: 0 16px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="course-tag">CST8208 — Computer Hardware</div>
+    <h1>Midterm<br><span>Study Guide</span></h1>
+  </div>
+  <div class="score-badge">Previous Score: 98 / 100</div>
+</header>
+
+<div class="progress-bar">
+  <span class="progress-label">PROGRESS</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <span class="progress-count" id="progressCount">0 / 16</span>
+</div>
+
+<main id="questions"></main>
+
+<div id="final-score">
+  <div class="final-inner">
+    <div class="final-title">Quiz Complete</div>
+    <div class="final-score-num" id="finalNum"></div>
+    <div class="final-msg" id="finalMsg"></div>
+    <button class="final-btn" onclick="resetAll()">Try Again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    id: 1,
+    type: "mc",
+    text: "What is CMOS, and what is its primary function in a PC?",
+    options: [
+      "A type of CPU cache memory used for instruction storage",
+      "A volatile memory that stores system config (time, date, BIOS settings), usually powered by a small battery",
+      "The chip connecting fast components on a motherboard (Northbridge)",
+      "A modern firmware replacement for legacy BIOS"
+    ],
+    correct: 1
+  },
+  {
+    id: 2,
+    type: "mc",
+    text: "What replaced traditional BIOS firmware in most modern systems?",
+    options: ["CMOS", "SpeedStep", "UEFI", "Northbridge"],
+    correct: 2
+  },
+  {
+    id: 3,
+    type: "mc",
+    text: "What is M.2, and what makes it faster than SATA?",
+    options: [
+      "A type of RAM slot; it's faster because it uses DDR5",
+      "A CPU socket type; it uses a wider bus than older sockets",
+      "An interface/connector for SSDs that connects directly to PCIe lanes, bypassing SATA's bandwidth limits",
+      "A wireless networking standard with lower latency than Wi-Fi"
+    ],
+    correct: 2
+  },
+  {
+    id: 4,
+    type: "mc",
+    text: "In a traditional motherboard chipset, which chip connects to the faster components and interfaces?",
+    options: ["Southbridge", "PCH", "Northbridge", "BIOS chip"],
+    correct: 2
+  },
+  {
+    id: 5,
+    type: "reveal",
+    text: "What voltage does each wire colour output from a PC power supply?",
+    answer: [
+      ["Black", "Ground (0V)"],
+      ["Red", "+5V"],
+      ["Yellow", "+12V"],
+      ["Orange", "+3.3V"],
+      ["Blue", "-12V"],
+      ["White", "-5V (obsolete)"]
+    ]
+  },
+  {
+    id: 6,
+    type: "mc",
+    text: "What is SpeedStep (Intel) and when does it activate?",
+    options: [
+      "A RAID technology that speeds up disk reads",
+      "A CPU overclocking feature that boosts clock speed under load",
+      "A power management feature that runs the CPU at a fraction of its normal speed when on battery / low load",
+      "An SSD caching technology that speeds up boot time"
+    ],
+    correct: 2
+  },
+  {
+    id: 7,
+    type: "mc",
+    text: "What was ExpressCard, and what form factors did it come in?",
+    options: [
+      "A GPU interface standard; 75W and 150W variants",
+      "A laptop expansion slot (successor to PC Card) available in 34mm and 54mm widths",
+      "A type of SSD form factor; available in 2230 and 2280 lengths",
+      "A Wi-Fi card standard; 2.4 GHz and 5 GHz variants"
+    ],
+    correct: 1
+  },
+  {
+    id: 8,
+    type: "mc",
+    text: "What is the most common battery type used in laptops today?",
+    options: ["Nickel-Metal Hydride (NiMH)", "Lead Acid", "Nickel Cadmium (NiCd)", "Lithium Ion"],
+    correct: 3
+  },
+  {
+    id: 9,
+    type: "mc",
+    text: "If a processor runs at 3.6 GHz with a 200 MHz base clock, what is the CPU multiplier?",
+    options: ["10", "14", "18", "36"],
+    correct: 2
+  },
+  {
+    id: 10,
+    type: "mc",
+    text: "Which type of memory is found in small quantities INSIDE the CPU package and is extremely fast?",
+    options: ["DRAM", "SDRAM", "DDR4 on DIMMs", "SRAM"],
+    correct: 3
+  },
+  {
+    id: 11,
+    type: "reveal",
+    text: "What are the minimum number of drives required for each RAID level?",
+    answer: [
+      ["RAID 0", "2 drives (striping)"],
+      ["RAID 1", "2 drives (mirroring)"],
+      ["RAID 3/4", "3 drives (striping + dedicated parity)"],
+      ["RAID 5", "3 drives (striping + rotating parity)"],
+      ["RAID 6", "4 drives (striping + dual rotating parity)"]
+    ]
+  },
+  {
+    id: 12,
+    type: "reveal",
+    text: "What screw type is used to install each component?",
+    answer: [
+      ["2.5\" SSD", "M3 fine thread pan head"],
+      ["5.25\" Optical drive", "M3 fine thread pan head"],
+      ["3.5\" HDD", "6-32 coarse thread (pan head OK)"],
+      ["Power supply", "6-32 coarse thread hex head"],
+      ["PCIe video card", "6-32 coarse thread hex head"]
+    ]
+  },
+  {
+    id: 13,
+    type: "reveal",
+    text: "Which storage terms belong to HDDs vs. SSDs?",
+    answer: [
+      ["HDD terms", "Cylinder, Sector, Track"],
+      ["SSD terms", "Page, Block"]
+    ]
+  },
+  {
+    id: 14,
+    type: "reveal",
+    text: "Describe what each RAID level does.",
+    answer: [
+      ["RAID 0", "Striping — splits data across drives, no redundancy, max speed"],
+      ["RAID 1", "Mirroring — exact copy on 2+ drives, full redundancy"],
+      ["RAID 3/4", "Striping with dedicated parity drive"],
+      ["RAID 5", "Striping with rotating (distributed) parity"],
+      ["RAID 6", "Striping with dual rotating parity — survives 2 drive failures"]
+    ]
+  },
+  {
+    id: 15,
+    type: "mc",
+    text: "What type of LCD panel technology is most commonly used in laptops?",
+    options: ["IPS (In-Plane Switching)", "OLED", "TFT (Thin Film Transistor)", "VA (Vertical Alignment)"],
+    correct: 2
+  },
+  {
+    id: 16,
+    type: "xor",
+    text: "RAID 5 Parity Calculator — XOR the data bytes to find the parity byte.\n\nHow is parity calculated in RAID 5? Enter up to 3 binary bytes (8-bit) to compute.",
+    hint: "Parity = Byte1 XOR Byte2 XOR Byte3. Try: 01100111, 01001010, 11111001 → answer is 11010100"
+  }
+];
+
+let answered = new Set();
+let correct_count = 0;
+
+function updateProgress() {
+  const total = questions.filter(q => q.type !== 'reveal').length + questions.filter(q => q.type === 'reveal').length;
+  const pct = (answered.size / questions.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressCount').textContent = `${answered.size} / ${questions.length}`;
+
+  if (answered.size === questions.length) {
+    setTimeout(showFinal, 600);
+  }
+}
+
+function showFinal() {
+  const mcTotal = questions.filter(q => q.type === 'mc').length + 1; // +1 for XOR
+  const pct = Math.round((correct_count / mcTotal) * 100);
+  const el = document.getElementById('finalNum');
+  el.textContent = pct + '%';
+  el.className = 'final-score-num ' + (pct >= 80 ? 'good' : pct >= 60 ? 'ok' : 'bad');
+  const msgs = {
+    good: "Excellent work! You're well prepared.",
+    ok: "Good effort — review the missed topics.",
+    bad: "Keep studying — you'll get there!"
+  };
+  document.getElementById('finalMsg').textContent = msgs[pct >= 80 ? 'good' : pct >= 60 ? 'ok' : 'bad'];
+  document.getElementById('final-score').classList.add('show');
+}
+
+function resetAll() {
+  answered.clear();
+  correct_count = 0;
+  document.getElementById('final-score').classList.remove('show');
+  renderQuestions();
+  updateProgress();
+}
+
+function renderQuestions() {
+  const container = document.getElementById('questions');
+  container.innerHTML = '';
+
+  questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + q.id;
+
+    let bodyHTML = '';
+
+    if (q.type === 'mc') {
+      bodyHTML = `<div class="options">` +
+        q.options.map((opt, i) =>
+          `<button class="option" onclick="checkAnswer(${q.id}, ${i}, ${q.correct})" id="opt-${q.id}-${i}">
+            <span class="opt-key">${String.fromCharCode(65+i)}</span>
+            ${opt}
+          </button>`
+        ).join('') +
+        `</div><div class="feedback" id="fb-${q.id}"></div>`;
+    } else if (q.type === 'reveal') {
+      const rows = q.answer.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+      bodyHTML = `
+        <div class="flashcard" onclick="revealCard(${q.id})">
+          <div class="flashcard-front" id="front-${q.id}">[ Click to reveal answer ]</div>
+          <div class="flashcard-back" id="back-${q.id}">
+            <table class="answer-table">${rows}</table>
+          </div>
+        </div>`;
+    } else if (q.type === 'xor') {
+      bodyHTML = `
+        <div class="xor-calc">
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:4px;">${q.hint}</div>
+          <div class="xor-inputs">
+            <div class="xor-input-group">
+              <span class="xor-label">BYTE 1</span>
+              <input class="xor-input" id="xb1" maxlength="8" placeholder="01100111">
+            </div>
+            <div class="xor-input-group">
+              <span class="xor-label">BYTE 2</span>
+              <input class="xor-input" id="xb2" maxlength="8" placeholder="01001010">
+            </div>
+            <div class="xor-input-group">
+              <span class="xor-label">BYTE 3 (optional)</span>
+              <input class="xor-input" id="xb3" maxlength="8" placeholder="11111001">
+            </div>
+            <button class="xor-btn" onclick="calcXOR()">Calculate XOR →</button>
+          </div>
+          <div class="xor-result" id="xor-result"></div>
+        </div>`;
+    }
+
+    const typeLabel = q.type === 'mc' ? 'Multiple Choice' : q.type === 'reveal' ? 'Flashcard' : 'Calculator';
+    const resetBtn = q.type !== 'reveal' ? '' :
+      `<div class="q-footer"><button class="reset-btn" onclick="resetReveal(${q.id})">Reset</button></div>`;
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">Q${String(idx+1).padStart(2,'0')}</span>
+        <span class="q-text">${q.text}</span>
+        <span class="q-type">${typeLabel}</span>
+      </div>
+      <div class="q-body">${bodyHTML}</div>
+      ${resetBtn}
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function checkAnswer(qId, chosen, correct) {
+  if (answered.has(qId)) return;
+  answered.add(qId);
+
+  const opts = document.querySelectorAll(`[id^="opt-${qId}-"]`);
+  const fb = document.getElementById(`fb-${qId}`);
+
+  opts.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) btn.classList.add('correct');
+    else if (i === chosen && chosen !== correct) btn.classList.add('wrong');
+    else if (i !== correct) btn.classList.add('reveal-correct');
+  });
+
+  if (chosen === correct) {
+    correct_count++;
+    fb.className = 'feedback correct';
+    fb.textContent = '✓ Correct!';
+    document.getElementById('card-' + qId).classList.add('answered-correct');
+  } else {
+    fb.className = 'feedback wrong';
+    fb.textContent = '✗ Incorrect — correct answer highlighted above.';
+    document.getElementById('card-' + qId).classList.add('answered-wrong');
+  }
+
+  updateProgress();
+}
+
+function revealCard(qId) {
+  const front = document.getElementById('front-' + qId);
+  const back = document.getElementById('back-' + qId);
+  if (!back.classList.contains('visible')) {
+    front.classList.add('hidden');
+    back.classList.add('visible');
+    if (!answered.has(qId)) {
+      answered.add(qId);
+      correct_count++;
+      document.getElementById('card-' + qId).classList.add('answered-correct');
+      updateProgress();
+    }
+  }
+}
+
+function resetReveal(qId) {
+  const front = document.getElementById('front-' + qId);
+  const back = document.getElementById('back-' + qId);
+  front.classList.remove('hidden');
+  back.classList.remove('visible');
+  answered.delete(qId);
+  if (correct_count > 0) correct_count--;
+  document.getElementById('card-' + qId).classList.remove('answered-correct','answered-wrong');
+  updateProgress();
+}
+
+function calcXOR() {
+  const b1 = document.getElementById('xb1').value.trim();
+  const b2 = document.getElementById('xb2').value.trim();
+  const b3 = document.getElementById('xb3').value.trim();
+  const result = document.getElementById('xor-result');
+
+  const valid = /^[01]{8}$/;
+  if (!valid.test(b1) || !valid.test(b2)) {
+    result.className = 'xor-result show';
+    result.style.color = 'var(--incorrect)';
+    result.textContent = '⚠ Enter valid 8-bit binary for at least Byte 1 and Byte 2.';
+    return;
+  }
+
+  let parity = parseInt(b1, 2) ^ parseInt(b2, 2);
+  let steps = `${b1}\nXOR ${b2}\n= ${parity.toString(2).padStart(8,'0')}`;
+
+  if (b3 && valid.test(b3)) {
+    const prev = parity;
+    parity = parity ^ parseInt(b3, 2);
+    steps += `\nXOR ${b3}\n= ${parity.toString(2).padStart(8,'0')}`;
+  }
+
+  const parityBin = parity.toString(2).padStart(8,'0');
+  result.className = 'xor-result show';
+  result.style.color = 'var(--accent3)';
+  result.innerHTML = `PARITY BYTE: <strong>${parityBin}</strong>  (decimal: ${parity}, hex: 0x${parity.toString(16).toUpperCase().padStart(2,'0')})\n\n${steps}`;
+  result.style.whiteSpace = 'pre';
+
+  if (!answered.has(16)) {
+    answered.add(16);
+    correct_count++;
+    document.getElementById('card-16').classList.add('answered-correct');
+    updateProgress();
+  }
+}
+
+renderQuestions();
+updateProgress();
+</script>
+</body>
+</html>
