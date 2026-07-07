@@ -1,7 +1,9 @@
 {
   "summer-2026": {
     "midterm": [
-      {"course": "DAT0129 — Database Management", "file": "dat0129_review_quiz.html"}
+      {"course": "DAT0129 - DATABASE MANAGEMENT", "file": "dat0129_review_quiz.html"}
+      {"course": "CST8316 - COMPUTER HARDWARE", "file": "cst8316-quiz.html"}
+      {"course": "CST8342 - WINDOWS OU/AD ", "file": "cst8342-quiz.html"}
     ],
     "final": []
   }
