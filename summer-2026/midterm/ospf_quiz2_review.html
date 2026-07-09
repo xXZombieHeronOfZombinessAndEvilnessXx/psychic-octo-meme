@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OSPF Review Quiz</title>
+<style>
+  :root{
+    --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#c9d1d9;
+    --accent:#58a6ff; --good:#3fb950; --bad:#f85149; --muted:#8b949e;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:720px;margin:0 auto;padding:24px 16px 80px;}
+  h1{font-size:1.4rem;margin-bottom:4px;}
+  .sub{color:var(--muted);font-size:.9rem;margin-bottom:20px;}
+  .bar{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 16px;margin-bottom:20px;font-size:.9rem;}
+  .streak{color:#f2cc60;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;display:none;}
+  .card.active{display:block;}
+  .qnum{color:var(--muted);font-size:.8rem;margin-bottom:6px;}
+  .qtext{font-size:1.02rem;margin-bottom:14px;white-space:pre-wrap;line-height:1.45;}
+  .opt{display:block;width:100%;text-align:left;background:#0d1117;border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:.95rem;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.correct{border-color:var(--good);background:rgba(63,185,80,.12);}
+  .opt.wrong{border-color:var(--bad);background:rgba(248,81,73,.12);}
+  input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:#0d1117;color:var(--text);font-size:.95rem;}
+  button.submit{margin-top:10px;background:var(--accent);color:#0d1117;border:none;padding:9px 18px;border-radius:8px;font-weight:600;cursor:pointer;}
+  button.next{margin-top:12px;background:transparent;border:1px solid var(--border);color:var(--text);padding:9px 18px;border-radius:8px;cursor:pointer;}
+  .feedback{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:.9rem;line-height:1.4;}
+  .feedback.good{background:rgba(63,185,80,.12);border:1px solid var(--good);}
+  .feedback.bad{background:rgba(248,81,73,.12);border:1px solid var(--bad);}
+  #results{display:none;}
+  .missed{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:10px;}
+  .missed .q{font-weight:600;margin-bottom:4px;}
+  .missed .a{color:var(--good);}
+  .checkbox-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;}
+  .checkbox-row:hover{border-color:var(--accent);}
+  .checkbox-row input{width:16px;height:16px;}
+  .scoreBig{font-size:2.2rem;font-weight:700;text-align:center;margin:20px 0 6px;}
+  .restart{display:block;margin:20px auto 0;background:var(--accent);color:#0d1117;border:none;padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>OSPF Review Quiz</h1>
+<div class="sub">Router-ID · DR/BDR · Cost · Interface config · Neighbor formation</div>
+<div class="bar"><span id="progress">Question 1 / 12</span><span class="streak">🔥 Streak: <span id="streakVal">0</span></span></div>
+<div id="quizArea"></div>
+
+<div id="results">
+  <div class="scoreBig" id="scoreBig"></div>
+  <div id="missedList"></div>
+  <button class="restart" onclick="restart()">Try Again</button>
+</div>
+
+<script>
+const questions = [
+{
+  type:"text",
+  q:"R6 has OSPF enabled on all interfaces, no router-id configured manually.\nGi0: 40.40.40.6 (up/up)\nGi1: 199.199.199.6 (up/up)\nLo6: 6.6.6.6 (admin down)\nWhat IP does R6 use as its OSPF router-id?",
+  answer:"199.199.199.6",
+  explain:"Loopbacks are always preferred for router-id, but ONLY if up/up. Lo6 is admin down, so it's excluded. Among remaining up interfaces, OSPF picks the HIGHEST IP address: 199.199.199.6 beats 40.40.40.6."
+},
+{
+  type:"text",
+  q:"R7 has OSPF enabled on all interfaces, no router-id configured manually.\nGi0: 172.16.5.7 (up/up)\nGi1: 88.88.88.7 (up/up)\nLo0: 5.5.5.7 (up/up)\nWhat IP does R7 use as its OSPF router-id?",
+  answer:"5.5.5.7",
+  explain:"When a loopback is up/up, it is always preferred over any physical interface for router-id selection — regardless of IP value. If multiple loopbacks exist, the highest loopback IP wins."
+},
+{
+  type:"text",
+  q:"RA(id 0.0.0.12) and RB(id 0.0.0.44) share Gi1: RA=150.12.44.12 Prio 0, RB=150.12.44.44 Prio 150.\nWhat is the router-id of the DR for network 150.12.44.0/24?",
+  answer:"0.0.0.44",
+  explain:"Priority 0 means RA can never become DR or BDR. RB is the only eligible router, so it becomes DR."
+},
+{
+  type:"text",
+  q:"On a shared broadcast segment: RA prio 100, router-id 0.0.0.90. RB prio 100, router-id 0.0.0.65.\nWhat is the router-id of the DR?",
+  answer:"0.0.0.90",
+  explain:"When priorities are tied, the higher router-id wins the DR election."
+},
+{
+  type:"text",
+  q:"R1→R2 cost 5, R1→R3 cost 9. R2→R4 cost 6. R3→R4 cost 2. Network 10.10.10.0/24 is connected to R4 with interface cost 3.\nCalculate the best OSPF metric from R1 to 10.10.10.0/24.",
+  answer:"14",
+  explain:"OSPF metric only counts OUTGOING interface costs along the path, and the best (lowest total) path is chosen.\nPath via R2: 5+6+3 = 14\nPath via R3: 9+2+3 = 14\nBoth are tied at 14 in this case — the answer is 14."
+},
+{
+  type:"checkbox",
+  q:"Router R5 Interface G0/3, IP 198.51.100.5/30. This is the WAN link directly facing the ISP's router (outside the organization). How should this interface be configured?",
+  options:["Enable OSPF","Configure as Passive","Configure as Broadcast","Configure as Point-to-Point","Do not enable OSPF"],
+  correct:["Do not enable OSPF"],
+  explain:"Links facing an external ISP are outside the OSPF domain — OSPF should not run on this interface at all."
+},
+{
+  type:"checkbox",
+  q:"Router R2 Interface G0/1, IP 172.20.4.1/24. Connects to a switch with only end-user PCs — no other routers on this LAN. How should this interface be configured?",
+  options:["Enable OSPF","Configure as Passive","Configure as Broadcast","Configure as Point-to-Point","Do not enable OSPF"],
+  correct:["Enable OSPF","Configure as Passive","Configure as Broadcast"],
+  explain:"The subnet must still be advertised, so OSPF is enabled. Since no neighbors exist on this LAN, it's set Passive (no hellos sent out). Network type stays Broadcast (the default for Ethernet) even though passive — passive and network type are independent settings."
+},
+{
+  type:"checkbox",
+  q:"Router R8 Interface G0/2, IP 10.5.5.1/24, on a shared LAN switch where R9 and R10 are also OSPF neighbors. How should this interface be configured?",
+  options:["Enable OSPF","Configure as Passive","Configure as Broadcast","Configure as Point-to-Point","Do not enable OSPF"],
+  correct:["Enable OSPF","Configure as Broadcast"],
+  explain:"Neighbors must form here, so it cannot be Passive. Broadcast is correct for a shared multi-access LAN segment."
+},
+{
+  type:"text",
+  q:"R1 G0/0: 10.1.1.1/30, Area 0, Hello 10, Dead 40\nR2 G0/0: 10.1.1.2/30, Area 1, Hello 10, Dead 40\nWhat is the resulting OSPF neighbor relationship? (NF or NN)",
+  answer:"NN",
+  explain:"Area IDs must match on both sides of a link. R1 is in Area 0, R2 is in Area 1 — mismatch prevents adjacency."
+},
+{
+  type:"text",
+  q:"R1 G0/0: 192.168.1.1/24, Area 0, Hello 10, Dead 40\nR2 G0/0: 192.168.1.2/24, Area 0, Hello 5, Dead 20\nWhat is the resulting OSPF neighbor relationship? (NF or NN)",
+  answer:"NN",
+  explain:"Hello and Dead intervals must match exactly between neighbors. R1 uses Hello 10/Dead 40, R2 uses Hello 5/Dead 20 — mismatch blocks adjacency."
+},
+{
+  type:"text",
+  q:"R1 G0/0: 172.30.9.1/28, Area 0, Hello 10, Dead 40\nR2 G0/0: 172.30.9.2/28, Area 0, Hello 10, Dead 40\nWhat is the resulting OSPF neighbor relationship? (NF or NN)",
+  answer:"NF",
+  explain:"Same subnet, same area, matching hello/dead timers — all conditions for adjacency are met."
+},
+{
+  type:"text",
+  q:"R1 G0/0: 10.20.30.1/29, Area 0\nR2 G0/0: 10.20.31.2/29, Area 0\nHello/Dead match on both.\nWhat is the resulting OSPF neighbor relationship? (NF or NN)",
+  answer:"NN",
+  explain:"The two IPs are in different subnets (10.20.30.0/29 vs 10.20.31.0/29). Interfaces must share the same subnet to form a neighbor relationship."
+}
+];
+
+let current=0, streak=0, score=0, results=[];
+
+function render(){
+  const area=document.getElementById('quizArea');
+  area.innerHTML='';
+  document.getElementById('progress').textContent=`Question ${current+1} / ${questions.length}`;
+  const qd=questions[current];
+  const card=document.createElement('div');
+  card.className='card active';
+
+  let html=`<div class="qnum">Q${current+1}</div><div class="qtext">${qd.q}</div>`;
+
+  if(qd.type==='text'){
+    html+=`<input type="text" id="txtInput" autocomplete="off" placeholder="Your answer">
+           <button class="submit" onclick="checkText()">Submit</button>
+           <div id="fb"></div>`;
+  } else if(qd.type==='checkbox'){
+    qd.options.forEach((o,i)=>{
+      html+=`<label class="checkbox-row"><input type="checkbox" value="${o}" id="cb${i}">${o}</label>`;
+    });
+    html+=`<button class="submit" onclick="checkBox()">Submit</button><div id="fb"></div>`;
+  }
+  card.innerHTML=html;
+  area.appendChild(card);
+  if(qd.type==='text'){
+    document.getElementById('txtInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkText();});
+    document.getElementById('txtInput').focus();
+  }
+}
+
+function lockInputs(){
+  document.querySelectorAll('#quizArea input').forEach(i=>i.disabled=true);
+  document.querySelectorAll('#quizArea .submit').forEach(b=>b.style.display='none');
+}
+
+function showNext(){
+  const fb=document.getElementById('fb');
+  const btn=document.createElement('button');
+  btn.className='next';
+  btn.textContent= current===questions.length-1 ? 'See Results' : 'Next Question →';
+  btn.onclick=()=>{ current++; if(current<questions.length){render();} else {showResults();} };
+  fb.appendChild(btn);
+}
+
+function checkText(){
+  const qd=questions[current];
+  const val=document.getElementById('txtInput').value.trim();
+  const correct = val.toLowerCase()===qd.answer.toLowerCase();
+  lockInputs();
+  const fb=document.getElementById('fb');
+  fb.className='feedback '+(correct?'good':'bad');
+  fb.innerHTML = (correct?'✅ Correct. ':`❌ Incorrect. Correct answer: <b>${qd.answer}</b>. `) + qd.explain;
+  if(correct){score++;streak++;}else{streak=0;}
+  document.getElementById('streakVal').textContent=streak;
+  results.push({q:qd.q, correct, answer: qd.type==='text'?qd.answer:qd.correct.join(', '), explain:qd.explain});
+  showNext();
+}
+
+function checkBox(){
+  const qd=questions[current];
+  const selected=[];
+  qd.options.forEach((o,i)=>{ if(document.getElementById('cb'+i).checked) selected.push(o); });
+  const correctSet=qd.correct.slice().sort().join('|');
+  const selSet=selected.slice().sort().join('|');
+  const correct = correctSet===selSet;
+  lockInputs();
+  qd.options.forEach((o,i)=>{
+    const row=document.getElementById('cb'+i).parentElement;
+    if(qd.correct.includes(o)) row.style.borderColor='var(--good)';
+    else if(selected.includes(o)) row.style.borderColor='var(--bad)';
+  });
+  const fb=document.getElementById('fb');
+  fb.className='feedback '+(correct?'good':'bad');
+  fb.innerHTML=(correct?'✅ Correct. ':`❌ Incorrect. Correct: <b>${qd.correct.join(', ')}</b>. `) + qd.explain;
+  if(correct){score++;streak++;}else{streak=0;}
+  document.getElementById('streakVal').textContent=streak;
+  results.push({q:qd.q, correct, answer: qd.correct.join(', '), explain:qd.explain});
+  showNext();
+}
+
+function showResults(){
+  document.getElementById('quizArea').style.display='none';
+  document.querySelector('.bar').style.display='none';
+  const res=document.getElementById('results');
+  res.style.display='block';
+  document.getElementById('scoreBig').textContent=`${score} / ${questions.length}`;
+  const missed = results.filter(r=>!r.correct);
+  const list=document.getElementById('missedList');
+  if(missed.length===0){
+    list.innerHTML='<p style="text-align:center;color:var(--good)">Perfect score. Nice work.</p>';
+  } else {
+    list.innerHTML='<h3>Review missed questions</h3>' + missed.map(m=>
+      `<div class="missed"><div class="q">${m.q.replace(/\n/g,'<br>')}</div><div class="a">Correct: ${m.answer}</div><div style="color:var(--muted);font-size:.85rem;margin-top:4px;">${m.explain}</div></div>`
+    ).join('');
+  }
+}
+
+function restart(){
+  current=0;streak=0;score=0;results=[];
+  document.getElementById('results').style.display='none';
+  document.getElementById('quizArea').style.display='block';
+  document.querySelector('.bar').style.display='flex';
+  document.getElementById('streakVal').textContent=0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
