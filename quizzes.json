@@ -2,6 +2,7 @@
   "summer-2026": {
     "midterm": [
       {"course": "DAT0129 - DATABASE MANAGEMENT", "file": "dat0129_review_quiz.html"},
+      {"course": "DAT0129 - DATABASE MANAGEMENT_2", "file": "DAT0129_midterm_quiz"},
       {"course": "CST8316 - COMPUTER HARDWARE", "file": "cst8316-quiz.html"},
       {"course": "CST8342 - WINDOWS OU/AD", "file": "cst8342-quiz.html"},
       {"course": "CST8371 - OSPF QUIZ 2", "file": "ospf_quiz2_review"}

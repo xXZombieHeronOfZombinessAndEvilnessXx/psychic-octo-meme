@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DAT0129 Midterm Review Quiz</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#1a1d24; --border:#2a2e38; --text:#e6e8ec;
+    --muted:#8b92a3; --accent:#5b8cff; --good:#2ecc71; --bad:#e74c3c;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif;max-width:820px;margin:0 auto;padding:24px;}
+  h1{font-size:1.4em;margin-bottom:4px;}
+  #stats{color:var(--muted);margin-bottom:16px;font-size:0.9em;}
+  .q{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px;}
+  .q h3{margin:0 0 10px;font-size:1em;}
+  .opts{display:flex;flex-direction:column;gap:8px;}
+  .opt{padding:10px 12px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:#20232c;}
+  .opt:hover{border-color:var(--accent);}
+  .opt.correct{background:#16301f;border-color:var(--good);}
+  .opt.incorrect{background:#331a1a;border-color:var(--bad);}
+  .opt.disabled{pointer-events:none;}
+  .exp{display:none;margin-top:10px;padding:10px;border-left:3px solid var(--accent);background:#151821;font-size:0.9em;color:var(--muted);}
+  .exp.show{display:block;}
+  .tag{display:inline-block;font-size:0.72em;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px;margin-bottom:8px;}
+  #results{position:sticky;bottom:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-top:10px;font-weight:bold;}
+  #reset{margin-top:10px;background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+<h1>DAT0129 Midterm Review Quiz</h1>
+<div id="stats">25 Multiple Choice + 5 SQL Command questions</div>
+<div id="quiz"></div>
+<div id="results">Score: <span id="score">0</span> / <span id="total">0</span></div>
+<button id="reset">Reset Quiz</button>
+
+<script>
+const questions = [
+// ===== 1. Relational Model Basics =====
+{tag:"Relational Model", q:"In the relational model, what does a 'tuple' correspond to?", opts:["A column","A row","A table","A constraint"], a:1, exp:"A tuple is a single row in a relation (table)."},
+{tag:"Relational Model", q:"What does 'attribute' mean in relational terminology?", opts:["A row","A table","A column","A primary key"], a:2, exp:"An attribute is a column, representing a property of the entity."},
+{tag:"Relational Model", q:"Which best distinguishes an entity from a relationship?", opts:["An entity is an action; a relationship is a thing","An entity is a thing/object; a relationship describes how entities are associated","They are the same concept","A relationship always becomes a primary key"], a:1, exp:"An entity represents a person, place, or thing; a relationship describes an association between two or more entities."},
+{tag:"Relational Model", q:"Business rules in database design are best described as:", opts:["Fixed SQL syntax rules","Constraints/policies from the organization that shape how data relates, and can be interpreted differently","Only apply to DDL statements","Something enforced only by the DBMS engine automatically"], a:1, exp:"Business rules come from organizational policy and can be ambiguous or interpreted differently, which affects design decisions like cardinality."},
+
+// ===== 2. ER Diagrams =====
+{tag:"ER Diagrams", q:"What is the primary purpose of an ERD?", opts:["To write SQL queries","To visually represent entities, attributes, and relationships in a database", "To store actual data","To define user permissions"], a:1, exp:"An ERD is a visual model of entities, their attributes, and the relationships between them."},
+{tag:"ER Diagrams", q:"How does a conceptual model differ from a logical model?", opts:["Conceptual is high-level and technology-independent; logical adds tables, attributes, and keys","They are identical","Conceptual includes SQL data types; logical does not","Logical models don't include keys"], a:0, exp:"Conceptual models capture high-level entities/relationships without implementation detail; logical models refine this into tables, attributes, and keys."},
+{tag:"ER Diagrams", q:"A logical data model specifically includes which of the following?", opts:["Server configuration","Tables, attributes, and keys","Physical storage/indexing details","User interface design"], a:1, exp:"Logical models define tables, attributes, and keys — one level more detailed than conceptual, but before physical implementation."},
+{tag:"ER Diagrams", q:"A 1:M relationship between STUDENT and ENROLLMENT means:", opts:["One student can have many enrollments, but each enrollment belongs to one student","Many students share one enrollment","Each student has exactly one enrollment","Enrollment and student are the same entity"], a:0, exp:"1:M (one-to-many) means one row on the '1' side relates to many rows on the 'M' side."},
+{tag:"ER Diagrams", q:"How is an M:M (many-to-many) relationship typically translated into tables?", opts:["It's left as-is; no extra table needed","A foreign key is added to one of the two tables","A junction/associative table is created holding FKs from both related tables","It becomes a composite attribute"], a:2, exp:"M:M relationships require a junction table containing foreign keys referencing both related tables (often forming a composite key)."},
+{tag:"ER Diagrams", q:"In a 1:1 relationship, where is the foreign key typically placed?", opts:["In neither table","In both tables always","In one of the two tables (often the one that depends on/references the other)","In a separate junction table"], a:2, exp:"1:1 relationships place the FK in one of the two related tables, chosen based on which entity depends on the other."},
+
+// ===== 3. Attributes =====
+{tag:"Attributes", q:"A 'simple attribute' is best defined as:", opts:["An attribute that can hold multiple values","An attribute made of smaller sub-parts","An attribute that holds a single, indivisible value","An attribute that is always a primary key"], a:2, exp:"A simple attribute holds one single, atomic value (e.g., Age)."},
+{tag:"Attributes", q:"Which is an example of a composite attribute?", opts:["Age","Email","Address (made up of street, city, postal code)","Student ID"], a:2, exp:"Address is composite — it can be broken into smaller parts like street, city, and postal code."},
+{tag:"Attributes", q:"A multi-valued attribute is one that:", opts:["Can only ever hold one value","Can hold several values for a single entity (e.g., multiple phone numbers)","Must be a foreign key","Cannot be stored in a relational database at all"], a:1, exp:"Multi-valued attributes can store more than one value per entity instance, like multiple phone numbers for one person."},
+{tag:"Attributes", q:"When normalizing a table, a multi-valued attribute like 'PhoneNumbers' is usually handled by:", opts:["Storing all numbers in one comma-separated column","Moving it to a separate related table","Deleting it from the design","Making it the primary key"], a:1, exp:"To keep the design relational and avoid repeating groups, multi-valued attributes are moved into their own table linked by a foreign key."},
+
+// ===== 4. Keys =====
+{tag:"Keys", q:"Which statement about a primary key is TRUE?", opts:["It can contain NULL values","It uniquely identifies each row and cannot be NULL","It must always be a string","It is optional for every table"], a:1, exp:"A primary key must be unique and NOT NULL — it's how each row is uniquely identified."},
+{tag:"Keys", q:"A composite key is:", opts:["A key generated automatically by the system","A primary key made up of two or more attributes together","A key that references another table","Any key that is not unique"], a:1, exp:"A composite key combines multiple attributes to uniquely identify a row when no single attribute is sufficient."},
+{tag:"Keys", q:"A candidate key refers to:", opts:["Only the key chosen as the primary key","Any attribute or attribute combination that COULD uniquely identify a row","A foreign key candidate for deletion","A key used only in junction tables"], a:1, exp:"Candidate keys are all possible attributes/combinations that qualify to be the primary key; one is chosen as the actual primary key."},
+{tag:"Keys", q:"A surrogate key is best described as:", opts:["A key with real-world meaning (like SIN or email)","A system-generated key with no business meaning (e.g., auto-increment ID)","A key that is always composite","A key found only in child tables"], a:1, exp:"Surrogate keys are artificial, system-generated identifiers (like an auto-increment integer) with no inherent business meaning."},
+{tag:"Keys", q:"A natural key differs from a surrogate key because it:", opts:["Is randomly generated","Has real-world meaning (e.g., SIN, email, ISBN)","Cannot be used as a primary key","Is always a foreign key"], a:1, exp:"Natural keys are derived from real-world, meaningful data, unlike surrogate keys which are artificially generated."},
+{tag:"Keys", q:"A foreign key's main purpose is to:", opts:["Uniquely identify rows in its own table","Store multi-valued data","Create/enforce a relationship by referencing a primary key in another table","Replace the need for a primary key"], a:2, exp:"A foreign key links to a primary key in another table, enforcing referential integrity and representing the relationship."},
+{tag:"Keys", q:"In a 1:M relationship between CUSTOMER and ORDER, which table receives the foreign key?", opts:["CUSTOMER (the '1' side)","ORDER (the 'many' side)","Both tables equally","Neither — a junction table is required"], a:1, exp:"The foreign key goes on the 'many' side (ORDER), referencing the primary key of the '1' side (CUSTOMER)."},
+
+// ===== 5. Table Design =====
+{tag:"Table Design", q:"Which attribute would be a POOR choice as a primary key?", opts:["A unique auto-incrementing ID","A person's full name","A system-generated surrogate key","An ISBN for a book"], a:1, exp:"Full name is a poor identifier — names can repeat and are not guaranteed unique."},
+{tag:"Table Design", q:"True or False: Every table in a relational database should have a primary key.", opts:["True","False"], a:0, exp:"A primary key is required to uniquely identify each row and maintain data integrity."},
+{tag:"Table Design", q:"Why is a phone number generally a poor standalone primary key?", opts:["It's always unique and stable","It can change and isn't guaranteed unique across all rows","It's too short","It must be a composite key"], a:1, exp:"Phone numbers can change over time and duplicates or NULLs are possible, making them unreliable identifiers."},
+
+// ===== 6/7. SQL Categories & Commands =====
+{tag:"SQL Categories", q:"Which SQL category does CREATE, ALTER, and DROP belong to?", opts:["DML","DDL","DQL","DCL"], a:1, exp:"DDL (Data Definition Language) defines/modifies database structure: CREATE, ALTER, DROP."},
+{tag:"SQL Categories", q:"INSERT, UPDATE, and DELETE belong to which SQL category?", opts:["DDL","DQL","DML","DCL"], a:2, exp:"DML (Data Manipulation Language) manages data within tables: INSERT, UPDATE, DELETE."},
+{tag:"SQL Categories", q:"SELECT belongs to which SQL category?", opts:["DDL","DML","DQL","DCL"], a:2, exp:"DQL (Data Query Language) is used to query/retrieve data — primarily the SELECT statement."},
+{tag:"SQL Categories", q:"Which command would you use to permanently remove an entire table and its structure?", opts:["DELETE","DROP","TRUNCATE only","UPDATE"], a:1, exp:"DROP removes the table structure entirely (DDL), unlike DELETE which only removes rows."},
+{tag:"SQL Categories", q:"What is the key difference between DELETE and DROP?", opts:["DELETE removes rows but keeps the table; DROP removes the entire table","DROP removes rows; DELETE removes the table","They are functionally identical","DELETE is DDL and DROP is DML"], a:0, exp:"DELETE (DML) removes rows while the table structure remains; DROP (DDL) removes the table itself."},
+
+// ===== SQL Command Usage (5) =====
+{tag:"SQL Usage", q:"Which statement correctly deletes all rows from 'book' where genre = 'Horror'?", opts:["DELETE book WHERE genre = 'Horror';","DELETE FROM book WHERE genre = 'Horror';","REMOVE FROM book WHERE genre = 'Horror';","DROP FROM book WHERE genre = 'Horror';"], a:1, exp:"Correct DELETE syntax is: DELETE FROM table WHERE condition;"},
+{tag:"SQL Usage", q:"Which query selects all columns from 'member' sorted by last_name descending?", opts:["SELECT * FROM member ORDER BY last_name DESC;","SELECT * FROM member SORT BY last_name DESC;","SELECT * FROM member GROUP BY last_name DESC;","SELECT * FROM member WHERE last_name DESC;"], a:0, exp:"ORDER BY column DESC sorts results in descending order."},
+{tag:"SQL Usage", q:"Which statement correctly updates a member's email where member_id = 5?", opts:["UPDATE member SET email = 'new@x.com' WHERE member_id = 5;","UPDATE member email = 'new@x.com' WHERE member_id = 5;","SET member email = 'new@x.com' WHERE member_id = 5;","UPDATE member VALUES email = 'new@x.com' WHERE member_id = 5;"], a:0, exp:"Correct UPDATE syntax: UPDATE table SET column = value WHERE condition;"},
+{tag:"SQL Usage", q:"Which query returns only the first 5 rows from 'loan'?", opts:["SELECT * FROM loan TOP 5;","SELECT * FROM loan LIMIT 5;","SELECT * FROM loan WHERE ROWNUM = 5;","SELECT FIRST 5 * FROM loan;"], a:1, exp:"LIMIT restricts the number of rows returned (PostgreSQL syntax)."},
+{tag:"SQL Usage", q:"Which statement correctly inserts a new row into book(title, author) in one command?", opts:["INSERT book (title, author) VALUES ('1984', 'Orwell');","INSERT INTO book (title, author) VALUES ('1984', 'Orwell');","ADD INTO book (title, author) VALUES ('1984', 'Orwell');","INSERT INTO book VALUES SET (title='1984', author='Orwell');"], a:1, exp:"Correct syntax: INSERT INTO table (columns) VALUES (values);"}
+];
+
+const quizEl = document.getElementById('quiz');
+const totalEl = document.getElementById('total');
+const scoreEl = document.getElementById('score');
+let score = 0;
+totalEl.textContent = questions.length;
+
+function render(){
+  quizEl.innerHTML = '';
+  questions.forEach((item, qi) => {
+    const div = document.createElement('div');
+    div.className = 'q';
+    div.innerHTML = `<span class="tag">${item.tag}</span><h3>${qi+1}. ${item.q}</h3>
+      <div class="opts">${item.opts.map((o,oi)=>`<div class="opt" data-qi="${qi}" data-oi="${oi}">${o}</div>`).join('')}</div>
+      <div class="exp" id="exp-${qi}"><strong>Explanation:</strong> ${item.exp}</div>`;
+    quizEl.appendChild(div);
+  });
+  document.querySelectorAll('.opt').forEach(el=>{
+    el.addEventListener('click', onAnswer);
+  });
+}
+
+function onAnswer(e){
+  const qi = +e.target.dataset.qi;
+  const oi = +e.target.dataset.oi;
+  const opts = document.querySelectorAll(`.opt[data-qi="${qi}"]`);
+  if(opts[0].classList.contains('disabled')) return;
+  opts.forEach(o=>o.classList.add('disabled'));
+  const correct = questions[qi].a;
+  opts[correct].classList.add('correct');
+  if(oi !== correct){
+    opts[oi].classList.add('incorrect');
+  } else {
+    score++;
+    scoreEl.textContent = score;
+  }
+  document.getElementById(`exp-${qi}`).classList.add('show');
+}
+
+document.getElementById('reset').addEventListener('click', ()=>{
+  score = 0;
+  scoreEl.textContent = 0;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
